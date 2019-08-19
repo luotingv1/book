@@ -44,8 +44,9 @@ const webpackConf = {
         test: /\.mpx$/,
         use: MpxWebpackPlugin.loader({
           transRpx: {
-            mode: 'only',
+            mode: 'all',
             comment: 'use rpx',
+            designWidth: 750,
             include: resolve('src')
           }
         })
@@ -96,7 +97,10 @@ const webpackConf = {
   mode: 'none',
   resolve: {
     extensions: ['.js', '.mpx'],
-    modules: ['node_modules']
+    modules: ['node_modules'],
+    alias: {
+      '@': resolve('src')
+    }
   }
 }
 
