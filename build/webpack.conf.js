@@ -46,7 +46,7 @@ const webpackConf = {
           transRpx: {
             mode: 'all',
             comment: 'use rpx',
-            designWidth: 750,
+            designWidth: 375,
             include: resolve('src')
           }
         })

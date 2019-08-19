@@ -1,0 +1,50 @@
+<template minapp='native' xlang='wxml'>
+  <view class='container'>
+
+  </view>
+</template>
+
+<script>
+import { createPage } from '@mpxjs/core'
+  createPage({
+    data: {
+    },
+    onShow() {
+      // 所在页面显示之后就会执行一次
+      console.log('page show')
+
+    },
+    onHide() {
+      // 页面切入后台执行
+     console.log('page hide')
+
+    },
+    methods: {
+
+    /**
+     * 页面相关事件处理函数--监听用户下拉动作
+    */
+    onPullDownRefresh() {},
+    /**
+     * 页面上拉触底事件的处理函数
+    */
+    onReachBottom() {},
+     /**
+       * 用户点击右上角分享
+     */
+    onShareAppMessage() {},
+    }
+  })
+</script>
+
+<style lang='scss'>
+
+ .container {} 
+</style>
+<script  type='application/json' lang='json'>
+{
+ "navigationBarTitleText": "发布书单",
+ "usingComponents": {}
+}
+</script>
+

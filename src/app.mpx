@@ -55,30 +55,33 @@ mpx.use(apiProxy, {
 
 </script>
 
-<style lang="stylus">
-page
-    height 100%
-image
-    display block
+<style lang="scss">
+@import '../static/css/app.less';
+
 </style>
 <script type="application/json">
  {
   "pages": [
+    "./pages/publish",
+    "./pages/publishBook",
     "./pages/index",
-    "./pages/greet",
     "./pages/message"
   ],
   "window": {
     "backgroundTextStyle": "light",
     "navigationBarBackgroundColor": "#fff",
-    "navigationBarTitleText": "WeChat",
-    "navigationBarTextStyle": "black"
+    "navigationBarTitleText": "书单圈",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#F6F6F6",
+    "backgroundTextStyle": "dark",
+    "enablePullDownRefresh": false
   },
   "tabBar": {
     "color": "#5A5A5A",
-    "selectedColor": "#2C81F9",
+    "selectedColor": "#5cadff",
     "borderStyle": "white",
     "backgroundColor": "#ffffff",
+     "borderStyle": "black",
     "list": [
       {
           "pagePath": "pages/index",
@@ -87,7 +90,7 @@ image
           "text": "书友圈"
       },
       {
-          "pagePath": "pages/greet",
+          "pagePath": "pages/publish",
           "iconPath": "../static/images/fabu.png",
           "selectedIconPath": "../static/images/fabu1.png",
           "text": "发布"

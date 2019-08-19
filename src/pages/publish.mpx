@@ -1,0 +1,88 @@
+<template minapp='native' xlang='wxml'>
+  <view class='container'>
+    <view class='flex'>
+      <navigator url="publishForm5" open-type="navigate" hover-class="none" class='flex-item'>
+        <image src="../../static/images/fabuicon.png" mode="scaleToFill" class='image-item'> </image>
+        <view>我要赚钱</view>
+      </navigator>
+      <navigator url="publishForm3" open-type="navigate" hover-class="none" class='flex-item'>
+        <image src="../../static/images/fabuicon.png" mode="scaleToFill" class='image-item shadow1'> </image>
+        <view>记录</view>
+      </navigator>
+    </view>
+  </view>
+</template>
+
+<script>
+  import {
+    createPage
+  } from '@mpxjs/core'
+  createPage({
+    data: {},
+    onShow() {
+      // 所在页面显示之后就会执行一次
+      console.log('page show')
+
+    },
+    onHide() {
+      // 页面切入后台执行
+      console.log('page hide')
+
+    },
+    methods: {
+
+      /**
+       * 页面相关事件处理函数--监听用户下拉动作
+       */
+      onPullDownRefresh() {},
+      /**
+       * 页面上拉触底事件的处理函数
+       */
+      onReachBottom() {},
+      /**
+       * 用户点击右上角分享
+       */
+      onShareAppMessage() {},
+    }
+  })
+
+</script>
+
+<style lang='scss'>
+.container{
+  background: #fff;
+  height: 100vh;
+}
+.flex{
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  .flex-item{
+    margin-top: 50rpx;
+    flex:1;
+    text-align: center;
+  }
+}
+
+.image-item{
+  width:100rpx;
+  height:100rpx;
+  border-radius:50%;
+  box-shadow:0 12rpx 14rpx 0rpx rgba(250,136,136,0.4);
+  &.shadow1{
+    box-shadow:0 12rpx 14rpx 0rpx rgba(99,212,181,0.4);
+  }
+  &+view{
+    font-size: 28rpx;
+    margin-top: 18rpx;
+    color:#333;
+  }
+}
+</style>
+<script type='application/json' lang='json'>
+  {
+    "navigationBarTitleText": "发布",
+    "usingComponents": {}
+  }
+
+</script>

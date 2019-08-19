@@ -1,25 +1,19 @@
 <template>
   <view class="index">
-    <view class="bg-swiper">
-      <index-swiper list="{{ list }}"></index-swiper>
+    <view class='tabs'>
+      <view class="tab {{active==1?'active':''}}">男频</view>
+      <view class="tab {{active==2?'active':''}}">女频</view>
     </view>
-    <image class="inv" src="../../static/images/inv.png" />
-    <view class="bg_music" wx:if="{{isPlay}}" bindtap="audioPlay">
-      <image src="../../static/images/music_icon.png" class="musicImg music_icon" />
-      <image src="../../static/images/music_play.png" class="music_play pauseImg" />
-    </view>
-    <view class="bg_music" wx:else bindtap="audioPlay">
-      <image src="../../static/images/music_icon.png" class="musicImg" />
-      <image src="../../static/images/music_play.png" class="music_play playImg" />
-    </view>
-    <view class="info" >
-      <view class="content">
-        <view class='h2'>Mr.罗霆 💖 Miss.郎江芦</view>
-        <view>谨定于 2019年11月8日 （星期五）中午17:00</view>
-        <view>农历 十月初八 中午十七点整 举办婚礼</view>
-        <view>席设：金华市金东区大喜成喜成厅</view>
-        <view>地址：金华市金东区清照路828号</view>
-        <image src="../../static/images/we.png" class="img_footer" />
+    <view>
+      <view class='mb-10' wx:for='{{list}}'>
+        <i-card title="{{item.title}}" thumb="{{item.avatar}}" >
+          <view slot="content">{{item.content}}</view>
+          <view slot="footer" class='flex'>
+            <label>点赞数量{{item.like_num}}</label>
+            <label>收藏数量{{item.collect_num}}</label>
+            <label>分享数量{{item.share_num}}</label>
+          </view>
+        </i-card>
       </view>
     </view>
   </view>
@@ -29,50 +23,65 @@
   import {
     createPage
   } from '@mpxjs/core'
-  import tools from '@/common/js/h_tools'
   createPage({
     data: {
-      isPlay: true,
-      list: [],
+      list: [{
+          avatar: 'https://i.loli.net/2017/08/21/599a521472424.jpg',
+          title: "斗破苍穹",
+          content: '哈哈哈 真的好看贼好看',
+          like_num: '1',
+          share_num: '1222',
+          collect_num: '222'
+        },
+        {
+          avatar: 'https://i.loli.net/2017/08/21/599a521472424.jpg',
+          title: "斗破苍穹",
+          content: '哈哈哈 真的好看贼好看',
+          like_num: '1',
+          share_num: '1222',
+          collect_num: '222'
+        },
+           {
+          avatar: 'https://i.loli.net/2017/08/21/599a521472424.jpg',
+          title: "斗破苍穹",
+          content: '哈哈哈 真的好看贼好看',
+          like_num: '1',
+          share_num: '1222',
+          collect_num: '222'
+        },
+           {
+          avatar: 'https://i.loli.net/2017/08/21/599a521472424.jpg',
+          title: "斗破苍穹",
+          content: '哈哈哈 真的好看贼好看',
+          like_num: '1',
+          share_num: '1222',
+          collect_num: '222'
+        },
+        {
+          avatar: 'https://i.loli.net/2017/08/21/599a521472424.jpg',
+          title: "斗破苍穹",
+          content: '哈哈哈 真的好看贼好看',
+          like_num: '1',
+          share_num: '1222',
+          collect_num: '222'
+        }
+      ],
       db: {},
-      audioCtx: {}
+      active: 1
     },
     onLoad() {
-      this.audioCtx = wx.createInnerAudioContext();
       this.db = wx.cloud.database();
       this.getList()
-      this.getMusicUrl()
     },
     methods: {
-      audioPlay() {
-        if (this.isPlay) {
-          this.audioCtx.pause()
-          this.isPlay = false
-          tools.showToast('您已暂停音乐播放~')
-        } else {
-          this.audioCtx.play()
-          this.isPlay = true
-          tools.showToast('背景音乐已开启~')
-        }
-      },
-
       getList() {
-        wx.showLoading({ //期间为了显示效果可以添加一个过度的弹出框提示“加载中”  
-            icon: 'loading',
-        });
-        this.db.collection('banner').get().then(res => {
-          wx.hideLoading();
-          this.list = res.data[0].bannerList;
-        })
-      },
-      getMusicUrl() {
-        this.db.collection('music').get().then(res => {
-          let musicUrl = res.data[0].musicUrl
-          this.audioCtx.src = musicUrl
-          this.audioCtx.loop = true
-          this.audioCtx.play()
-          this.isPlay = true
-        })
+        // wx.showLoading({ //期间为了显示效果可以添加一个过度的弹出框提示“加载中”  
+        //     icon: 'loading',
+        // });
+        // this.db.collection('banner').get().then(res => {
+        //   wx.hideLoading();
+        //   this.list = res.data[0].bannerList;
+        // })
       }
     },
     onShareAppMessage: (res) => {
@@ -84,118 +93,52 @@
 
 </script>
 
+<style lang="scss" scoped>
+  .index {
+    padding-top: 90rpx;
+  }
+
+  .tabs {
+    margin-top: 26rpx;
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 1rpx solid #5cadff;
+    font-size: 0;
+    border-radius:5rpx;
+    overflow:hidden;
+    .tab {
+      display: inline-block;
+      width: 120rpx;
+      text-align: center;
+      font-size: 26rpx;
+
+      &.active {
+        background: #5cadff;
+        color: #fff;
+      }
+
+      &:first-child {
+        border-right: 1rpx solid #5cadff;
+      }
+    }
+
+  }
+
+  .flex {
+    display: flex;
+    justify-content: space-between;
+  }
+
+</style>
+
 <script type="application/json">
   {
-     "navigationBarTitleText": "婚礼邀请函",
+    "navigationBarTitleText": "书友圈",
     "usingComponents": {
-      "index-swiper": "../components/indexSwiper"
+      "i-card": "../components/iview/card"
     }
   }
 
 </script>
-
-<style lang="scss">
-  .index{
-    background: #000;
-  }
-</style>
-
-<style scoped lang="stylus">
-@-webkit-keyframes musicRotate
-  from
-    -webkit-transformb rotate(0deg)
-  to
-    -webkit-transform rotate(360deg)
-@-webkit-keyframes musicStop
-  from
-    -webkit-transform rotate(20deg)
-  to
-    -webkit-transform rotate(0deg)
-@-webkit-keyframes musicStart
-  from
-    -webkit-transform rotate(0deg)
-  to
-    -webkit-transform rotate(20deg)
-@-webkit-keyframes infoAnimation
-  0%
-    -webkit-transform scale(1) translate(0, 0)
-  50%
-    -webkit-transform scale(.9) translate(5px, 5px)
-  100%
-    -webkit-transform scale(1) translate(0, 0)
-.index
-  height 100%
-  position relative
-  .img
-    width 100%
-    height 100%
-  .bg-swiper
-    width 100%
-    height 100%
-  .inv
-    position absolute
-    top 20rpx
-    left 89rpx
-    width 572rpx
-    height 69rpx
-    z-index 9
-  .bg_music
-    position fixed
-    right 0
-    top 20rpx
-    width 100rpx
-    z-index 99
-    display flex
-    justify-content flex-start
-    align-items flex-start
-    .musicImg
-      width 60rpx
-      height 60rpx
-    .music_icon
-      animation musicRotate 3s linear infinite
-    .music_play
-      width 28rpx
-      height 60rpx
-      margin-left -10rpx
-      transform-origin top
-      -webkit-transform rotate(20deg)
-    .playImg
-      animation musicStop 1s linear forwards
-    .pauseImg
-      animation musicStart 1s linear forwards
-  .info
-    width 630rpx
-    background rgba(255, 255, 255, 0.75)
-    z-index 9
-    position fixed
-    bottom 40rpx
-    left 50rpx
-    padding 10rpx
-    animation infoAnimation 12s linear infinite
-    .content
-      width 626rpx
-      border 1rpx solid #000
-      display flex
-      flex-direction column
-      justify-content flex-start
-      align-items center
-      position relative
-      padding-bottom 30rpx
-      .h2
-        font-size 50rpx
-        height 100rpx
-        line-height 100rpx
-      view
-        font-size 24rpx
-        height 60rpx
-        line-height 60rpx
-      .img_footer
-        position absolute
-        bottom 12rpx
-        left 53rpx
-        z-index 99
-        height 14rpx
-        width 520rpx
-  #myAudio
-    display none
-</style>
