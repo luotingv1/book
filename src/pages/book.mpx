@@ -24,7 +24,7 @@
 
 <script>
   import tools from '@/common/js/h_tools'
-  import {
+  import mpx,{
     createPage
   } from '@mpxjs/core'
   createPage({

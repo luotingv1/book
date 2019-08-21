@@ -1,16 +1,18 @@
 <template minapp='native' xlang='wxml'>
   <view class='container'>
     <view class='flex'>
-      <button bindgetuserinfo="getUserAuthorize" open-type="getUserInfo" class='flex-item' hover-class="none"
-        plain="{{true}}">
-        <image src="../../static/images/shudan.png" mode="scaleToFill" class='image-item' bindtap='goPublish'> </image>
-        <view>分享书单</view>
-      </button>
-      <navigator url="publishBook" open-type="navigate" hover-class="none" class='flex-item'>
-        <image src="../../static/images/fabuicon.png" mode="scaleToFill" class='image-item shadow1' bindtap='goPublish'>
-        </image>
-        <view>添加书籍</view>
-      </navigator>
+      <block wx:if='{{isAccredit}}'>
+        <navigator url="addBook" open-type="navigate" hover-class="none" class='flex-item'>
+          <image src="../../static/images/shudan.png" mode="scaleToFill" class='image-item'></image>
+          <view>添加书籍</view>
+        </navigator>
+        <navigator url="publishBook" open-type="navigate" hover-class="none" class='flex-item'>
+          <image src="../../static/images/fabuicon.png" mode="scaleToFill" class='image-item shadow1'></image>
+          <view>分享书单</view>
+        </navigator>
+      </block>
+      <i-button wx:else bindgetuserinfo="getUserAuthorize" open-type="getUserInfo" type="info" hover-class="none"
+        size="small">点击发布</i-button>
     </view>
   </view>
 </template>
@@ -21,7 +23,13 @@
   } from '@mpxjs/core'
   createPage({
     data: {
-      isAccredit: false
+      isAccredit: true,
+      openId: null,
+      db: null
+    },
+    onLoad() {
+      this.db = wx.cloud.database();
+      this.getOpenId()
     },
     onShow() {
       // 所在页面显示之后就会执行一次
@@ -32,25 +40,43 @@
       })
     },
     methods: {
-      goPublish() {
-        if (this.isAccredit) {
-          wx.navigateTo({
-            url: 'publishBook',
+      getUserAuthorize(e) {
+        if (e.detail.errMsg === 'getUserInfo:ok') {
+          wx.getUserInfo({
+            success: (res) => {
+              this.userInfo = res.userInfo;
+              this.isAccredit = true;
+              this.getOpenId()
+            }
           })
         }
-
       },
-      getUserAuthorize({
-        detail: {
-          userInfo
-        }
-      }) {
-        if (userInfo) {
-          this.isAccredit = true;
-          wx.navigateTo({
-            url: 'publishBook',
-          })
-        }
+      addUser() {
+        let user = this.db.collection('user')
+        user.add({
+          data: {
+            user: this.userInfo
+          }
+        })
+      },
+      getIsExist() {
+        let user = this.db.collection('user')
+        user.where({
+          _openid: this.openId
+        }).get().then(res => {
+          if (res.data.length === 0) {
+            this.addUser()
+          }
+        })
+      },
+      getOpenId() {
+        wx.cloud.callFunction({
+          name: 'user',
+          data: {}
+        }).then(res => {
+          this.openId = res.result.openid;
+          this.getIsExist()
+        })
       },
     }
   })
@@ -103,7 +129,6 @@
 <script type='application/json' lang='json'>
   {
     "navigationBarTitleText": "发布",
-    "usingComponents": {}
   }
 
 </script>

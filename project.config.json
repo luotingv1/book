@@ -1,15 +1,19 @@
 {
-  "compileType": "miniprogram",
-  "setting": {
-    "newFeature": true,
+	"miniprogramRoot": "miniprogram",
+  "cloudfunctionRoot": "functions",
+	"compileType": "miniprogram",
+	"setting": {
+		"newFeature": true,
     "urlCheck": true,
     "es6": false,
     "postcss": true,
     "minified": false,
     "autoAudits": false
-  },
-  "appid": "wx282f348c26fb35f0",
-  "projectname": "book",
-  "description": "A mpx project",
-  "condition": {}
+	},
+	"appid": "wx282f348c26fb35f0",
+	"projectname": "book",
+	"description": "A mpx project",
+	"simulatorType": "wechat",
+	"simulatorPluginLibVersion": {},
+	"condition": {}
 }

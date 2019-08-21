@@ -36,7 +36,7 @@
 
 <script>
 const { $Toast } = require('../components/iview/base/index');
-  import {
+  import mpx,{
     createPage
   } from '@mpxjs/core'
   createPage({
@@ -88,11 +88,9 @@ const { $Toast } = require('../components/iview/base/index');
     },
     onLoad() {
       // 所在页面显示之后就会执行一次
-      wx.getUserInfo({
-        success: (res) => {
-          this.userInfo = res.userInfo
-        }
-      })
+        mpx.getUserInfo().then((res)=>{
+           this.userInfo = res.userInfo
+        })
     },
     methods: {
       save() {
@@ -102,6 +100,7 @@ const { $Toast } = require('../components/iview/base/index');
                 content: '请完成书单填写',
                 type: 'warning'
             });
+             return;
           }
         }
         //保存到数据库

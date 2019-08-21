@@ -14,7 +14,7 @@ let webpackMainConfig = require('./webpack.conf')
 var prodEnv = require('../config/prod.env')
 var devEnv = require('../config/dev.env')
 
-const mainSubDir = ''
+const mainSubDir = 'miniprogram'
 function resolveDist (file, subPathStr = mainSubDir) {
   return path.resolve(__dirname, '../dist', subPathStr, file || '')
 }
@@ -29,12 +29,19 @@ const webpackWxConfig = merge(webpackMainConfig, {
       {
         from: path.resolve(__dirname, '../project.config.json'),
         to: path.resolve(__dirname, '../dist/project.config.json')
+      },
+      {
+        from: path.resolve(__dirname, '../static/functions'),
+        to: path.resolve(__dirname, '../dist/functions')
       }
     ])
   ]
 })
 
 webpackConfigArr.push(merge(webpackWxConfig, {
+  output: {
+    path: resolveDist()
+  },
   plugins: [
     new MpxWebpackPlugin(Object.assign({mode: userSelectedMode}, mpxWebpackPluginConfig))
   ]

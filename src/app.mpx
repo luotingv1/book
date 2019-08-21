@@ -61,9 +61,10 @@ mpx.use(apiProxy, {
 <script type="application/json">
  {
   "pages": [
-    "./pages/personal",
     "./pages/publish",
     "./pages/publishBook",
+    "./pages/addBook",
+    "./pages/personal",
     "./pages/index"
   ],
   "window": {
@@ -86,7 +87,7 @@ mpx.use(apiProxy, {
           "pagePath": "pages/index",
           "iconPath": "../static/images/shuyou.png",
           "selectedIconPath": "../static/images/shuyou1.png",
-          "text": "书友圈"
+          "text": "广场"
       },
       {
           "pagePath": "pages/publish",
@@ -101,6 +102,9 @@ mpx.use(apiProxy, {
           "text": "我的"
       }
     ]
+  },
+  "usingComponents":{
+    "i-button": "./components/iview/button"
   },
   "cloud": true
 }
