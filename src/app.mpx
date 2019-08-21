@@ -57,15 +57,14 @@ mpx.use(apiProxy, {
 
 <style lang="scss">
 @import '../static/css/app.less';
-
 </style>
 <script type="application/json">
  {
   "pages": [
+    "./pages/personal",
     "./pages/publish",
     "./pages/publishBook",
-    "./pages/index",
-    "./pages/message"
+    "./pages/index"
   ],
   "window": {
     "backgroundTextStyle": "light",
@@ -96,7 +95,7 @@ mpx.use(apiProxy, {
           "text": "发布"
       },
       {
-          "pagePath": "pages/message",
+          "pagePath": "pages/personal",
           "iconPath": "../static/images/my.png",
           "selectedIconPath": "../static/images/my1.png",
           "text": "我的"
@@ -105,5 +104,4 @@ mpx.use(apiProxy, {
   },
   "cloud": true
 }
-
 </script>

@@ -1,0 +1,67 @@
+<template minapp='native' xlang='wxml'>
+  <view class='container'>
+    <view class='nick alignCenter mt-10'>
+      <image src="{{userInfo.avatarUrl}}" class='avatar'></image>
+      <label class='f20 ml-10'>{{userInfo.nickName}}</label>
+    </view>
+    <i-cell-group i-class="mt-10">
+      <i-cell title="我的收藏" is-link ></i-cell>
+      <i-cell title="我的发布" is-link url="/pages/" ></i-cell>
+      <i-cell title="我的图书" is-link url="/pages/"></i-cell>
+    </i-cell-group>
+  </view>
+</template>
+
+<script>
+  import {
+    createPage
+  } from '@mpxjs/core'
+  createPage({
+    data: {
+      userInfo: {},
+    },
+    onLoad() {
+      // 所在页面显示之后就会执行一次
+      wx.getUserInfo({
+        success: (res) => {
+          this.userInfo = res.userInfo
+        }
+      })
+    },
+    methods: {
+
+    }
+  })
+
+</script>
+
+<style lang='scss' scoped>
+  .nick {
+    padding: 40rpx;
+    background: #5cadff;
+
+    label {
+      margin-left: 40rpx;
+      color: azure;
+    }
+  }
+
+  .avatar {
+    display: inline-block;
+    width: 120rpx;
+    height: 120rpx;
+    border-radius: 50%;
+  }
+
+</style>
+<script type='application/json' lang='json'>
+  {
+    "navigationBarTitleText": "个人中心",
+    "usingComponents": {
+      "i-avatar": "../components/iview/avatar",
+      "i-cell-group": "../components/iview/cell-group",
+      "i-cell": "../components/iview/cell"
+    }
+  }
+
+</script>

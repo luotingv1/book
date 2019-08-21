@@ -1,50 +1,224 @@
 <template minapp='native' xlang='wxml'>
   <view class='container'>
-
+    <i-toast id="toast" />
+    <view class='nick alignCenter mt-10'>
+      <i-avatar src="{{userInfo.avatarUrl}}" size="default"></i-avatar>
+      <label class='f14 ml-10'>{{userInfo.nickName}}</label>
+    </view>
+    <i-panel hide-border='{{true}}'>
+      <i-input placeholder="填写书单名称" type='text' maxlength='20' value="{{shudan.title}}"
+        bind:change="changeVal('title',$event)" />
+      <i-input value="{{shudan.content}}" type="textarea" placeholder="填写书单介绍(最多不超过200字)" maxlength="200"
+        bind:change="changeVal('content',$event)" i-class='textarea' />
+    </i-panel>
+    <view class="alignCenter addbook">
+      <i-button bind:click="addbooks" type="ghost" shape="circle" size='small' inline>添加书籍</i-button>
+      <i-radio-group current="{{shudan.sex}}" bindchange="handleChange">
+        <i-radio value="男频" i-class='radio'></i-radio>
+        <i-radio value="女频" i-class='radio'></i-radio>
+      </i-radio-group>
+    </view>
+    <i-cell title="{{item.name}}" value='{{item.classifyName}}' wx:key='{{item.classifyId}}' wx:for='{{shudan.books}}'>
+    </i-cell>
+    <i-button bind:click="save" type='info' i-class='btn'>保存书单</i-button>
+    <i-modal visible="{{ visible }}" bind:ok="add" bind:cancel="handleClose">
+      <i-input title='书名' placeholder="填写书名《XXX》" type='text' maxlength='20' bind:change="changebookname"
+        value='{{book.name}}' />
+      <view class="picker-classify">
+        <label class="picker-title">选择分类</label>
+        <picker bindchange="bindPickerChange" value="{{index}}" range="{{array}}" range-key='name' class='picker'>
+          <view class="picker">{{book.classifyName}}</view>
+        </picker>
+      </view>
+    </i-modal>
   </view>
 </template>
 
 <script>
-import { createPage } from '@mpxjs/core'
+const { $Toast } = require('../components/iview/base/index');
+  import {
+    createPage
+  } from '@mpxjs/core'
   createPage({
     data: {
+      userInfo: {},
+      visible: false,
+      shudan: {
+        title: "",
+        content: "",
+        sex: '男频',
+        books: []
+      },
+      index: 0,
+      array: [{
+          id: "",
+          name: '请选择分类'
+        },
+        {
+          id: 1,
+          name: '玄幻奇幻'
+        }, {
+          id: 2,
+          name: '同人小说'
+        }, {
+          id: 3,
+          name: '武侠仙侠'
+        }, {
+          id: 4,
+          name: '都市言情'
+        }, {
+          id: 5,
+          name: '历史军事'
+        }, {
+          id: 6,
+          name: '科幻灵异'
+        }, {
+          id: 7,
+          name: '网游竞技'
+        }, {
+          id: 8,
+          name: '女生频道'
+        }
+      ],
+      book: {
+        name: "",
+        classifyId: "",
+        classifyName: "请添加分类"
+      }
     },
-    onShow() {
+    onLoad() {
       // 所在页面显示之后就会执行一次
-      console.log('page show')
-
-    },
-    onHide() {
-      // 页面切入后台执行
-     console.log('page hide')
-
+      wx.getUserInfo({
+        success: (res) => {
+          this.userInfo = res.userInfo
+        }
+      })
     },
     methods: {
-
-    /**
-     * 页面相关事件处理函数--监听用户下拉动作
-    */
-    onPullDownRefresh() {},
-    /**
-     * 页面上拉触底事件的处理函数
-    */
-    onReachBottom() {},
-     /**
-       * 用户点击右上角分享
-     */
-    onShareAppMessage() {},
+      save() {
+        for(let val of Object.values(this.shudan)){
+          if(val.length==0){
+              $Toast({
+                content: '请完成书单填写',
+                type: 'warning'
+            });
+          }
+        }
+        //保存到数据库
+      },
+      bindPickerChange(e) {
+        this.index = e.detail.value;
+        this.book.classifyId = this.array[this.index].id;
+        this.book.classifyName = this.array[this.index].name;
+      },
+      changeVal(value, e) {
+        this.shudan[value] = e.detail.detail.value;
+      },
+      changebookname(e) {
+        this.book.name = e.detail.detail.value;
+      },
+      addbooks() {
+        this.visible = true;
+        this.book.name = '';
+        this.book.classifyId = '';
+        this.book.classifyName = "请添加分类";
+        this.index = 0;
+      },
+      add() {
+        if (this.book.name || this.book.classifyId) {
+          this.shudan.books.push(this.book);
+          this.visible = false;
+        }
+      },
+      handleClose() {
+        this.visible = false;
+      },
+      handleChange({
+        detail = {}
+      }) {
+        this.shudan.sex = detail.value;
+      },
     }
   })
+
 </script>
 
-<style lang='scss'>
-
- .container {} 
-</style>
-<script  type='application/json' lang='json'>
-{
- "navigationBarTitleText": "发布书单",
- "usingComponents": {}
+<style lang='scss' scoped>
+.container{
+  padding-bottom: 88rpx;
 }
-</script>
+  .nick {
+    padding: 0 30rpx;
+  }
 
+  .avatar {
+    display: inline-block;
+    width: 100rpx;
+    height: 100rpx;
+    border-radius: 50%;
+    border: 1px solid #ccc;
+  }
+
+  .textarea textarea {
+    min-height: 200rpx;
+  }
+
+  button.btn {
+    position: fixed;
+    bottom:0;
+    left:0;
+    right:0;
+    margin:0;
+  }
+
+  .radio {
+    display: inline-block;
+  }
+
+  .addbook {
+    justify-content: space-between;
+  }
+
+  .picker-classify {
+    position: relative;
+    display: flex;
+    background: #fff;
+    align-items: center;
+    line-height: 1.4;
+    font-size: 28rpx;
+    overflow: hidden;
+    padding: 14rpx 30rpx;
+    color: #495060;
+
+    .picker-title {
+      min-width: 130rpx;
+      padding-right: 20rpx;
+    }
+
+    .picker {
+      flex: 1;
+      line-height: 1.6;
+      padding: 8rpx 0;
+      min-height: 44rpx;
+      height: auto;
+    }
+  }
+
+</style>
+<script type='application/json' lang='json'>
+  {
+    "navigationBarTitleText": "创建书单",
+    "usingComponents": {
+      "i-avatar": "../components/iview/avatar",
+      "i-input": "../components/iview/input",
+      "i-panel": "../components/iview/panel",
+      "i-button": "../components/iview/button",
+      "i-radio-group": "../components/iview/radio-group",
+      "i-radio": "../components/iview/radio",
+      "i-modal": "../components/iview/modal",
+      "i-cell": "../components/iview/cell",
+      "i-toast": "../components/iview/toast"
+    }
+  }
+
+</script>

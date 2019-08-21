@@ -1,13 +1,15 @@
 <template minapp='native' xlang='wxml'>
   <view class='container'>
     <view class='flex'>
-      <navigator url="publishForm5" open-type="navigate" hover-class="none" class='flex-item'>
-        <image src="../../static/images/fabuicon.png" mode="scaleToFill" class='image-item'> </image>
-        <view>我要赚钱</view>
-      </navigator>
-      <navigator url="publishForm3" open-type="navigate" hover-class="none" class='flex-item'>
-        <image src="../../static/images/fabuicon.png" mode="scaleToFill" class='image-item shadow1'> </image>
-        <view>记录</view>
+      <button bindgetuserinfo="getUserAuthorize" open-type="getUserInfo" class='flex-item' hover-class="none"
+        plain="{{true}}">
+        <image src="../../static/images/shudan.png" mode="scaleToFill" class='image-item' bindtap='goPublish'> </image>
+        <view>分享书单</view>
+      </button>
+      <navigator url="publishBook" open-type="navigate" hover-class="none" class='flex-item'>
+        <image src="../../static/images/fabuicon.png" mode="scaleToFill" class='image-item shadow1' bindtap='goPublish'>
+        </image>
+        <view>添加书籍</view>
       </navigator>
     </view>
   </view>
@@ -18,66 +20,85 @@
     createPage
   } from '@mpxjs/core'
   createPage({
-    data: {},
+    data: {
+      isAccredit: false
+    },
     onShow() {
       // 所在页面显示之后就会执行一次
-      console.log('page show')
-
-    },
-    onHide() {
-      // 页面切入后台执行
-      console.log('page hide')
-
+      wx.getSetting({
+        success: (res) => {
+          this.isAccredit = res.authSetting['scope.userInfo'] ? true : false;
+        }
+      })
     },
     methods: {
+      goPublish() {
+        if (this.isAccredit) {
+          wx.navigateTo({
+            url: 'publishBook',
+          })
+        }
 
-      /**
-       * 页面相关事件处理函数--监听用户下拉动作
-       */
-      onPullDownRefresh() {},
-      /**
-       * 页面上拉触底事件的处理函数
-       */
-      onReachBottom() {},
-      /**
-       * 用户点击右上角分享
-       */
-      onShareAppMessage() {},
+      },
+      getUserAuthorize({
+        detail: {
+          userInfo
+        }
+      }) {
+        if (userInfo) {
+          this.isAccredit = true;
+          wx.navigateTo({
+            url: 'publishBook',
+          })
+        }
+      },
     }
   })
 
 </script>
 
 <style lang='scss'>
-.container{
-  background: #fff;
-  height: 100vh;
-}
-.flex{
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-around;
-  .flex-item{
-    margin-top: 50rpx;
-    flex:1;
-    text-align: center;
+  .container {
+    background: #fff;
+    height: 100vh;
   }
-}
 
-.image-item{
-  width:100rpx;
-  height:100rpx;
-  border-radius:50%;
-  box-shadow:0 12rpx 14rpx 0rpx rgba(250,136,136,0.4);
-  &.shadow1{
-    box-shadow:0 12rpx 14rpx 0rpx rgba(99,212,181,0.4);
+  .flex {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+
+    .flex-item {
+      margin-top: 50rpx;
+      flex: 1;
+      text-align: center;
+      border: 0;
+      font-size: 0;
+    }
+
+    button.flex-item {
+      padding: 0;
+      line-height: 1;
+    }
   }
-  &+view{
-    font-size: 28rpx;
-    margin-top: 18rpx;
-    color:#333;
+
+  .image-item {
+    width: 100rpx;
+    height: 100rpx;
+    border-radius: 50%;
+    box-shadow: 0 12rpx 14rpx 0rpx rgba(250, 136, 136, 0.4);
+
+    &.shadow1 {
+      box-shadow: 0 12rpx 14rpx 0rpx rgba(99, 212, 181, 0.4);
+    }
+
+    &+view {
+      font-size: 28rpx;
+      margin-top: 18rpx;
+      color: #333;
+    }
   }
-}
+
 </style>
 <script type='application/json' lang='json'>
   {
