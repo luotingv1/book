@@ -1,10 +1,10 @@
 page{
   color:#333;
+  font-size: 24rpx;
+  height: 100%;
 }
 .index{
-min-height: 100vh;
-font-size: 24rpx;
-// background: #fafafa;
+min-height: 100%;
 }
 
 .bg-white {
@@ -78,4 +78,29 @@ font-size: 24rpx;
   width: 0;
   height: 0;
   color: transparent;
+}
+
+//列表找不到空白页面
+.empty-wrap {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
+  align-items: center;
+}
+
+.image-tip {
+  display: block;
+  width: 180rpx;
+  height: 180rpx;
+}
+
+.tip-text {
+  margin-top: 10rpx;
+  font-size: 28rpx;
+  color: #7f7f7f;
+  text-align: center;
 }

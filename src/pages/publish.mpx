@@ -18,18 +18,22 @@
 </template>
 
 <script>
-  import {
+  import mpx, {
     createPage
   } from '@mpxjs/core'
+  import store from '../store/index'
   createPage({
     data: {
       isAccredit: true,
-      openId: null,
       db: null
+    },
+    computed: {
+      openId(){
+        return store.getters.openId;
+      }
     },
     onLoad() {
       this.db = wx.cloud.database();
-      this.getOpenId()
     },
     onShow() {
       // 所在页面显示之后就会执行一次
@@ -42,12 +46,10 @@
     methods: {
       getUserAuthorize(e) {
         if (e.detail.errMsg === 'getUserInfo:ok') {
-          wx.getUserInfo({
-            success: (res) => {
-              this.userInfo = res.userInfo;
-              this.isAccredit = true;
-              this.getOpenId()
-            }
+          mpx.getUserInfo().then((res) => {
+            this.userInfo = res.userInfo;
+            this.isAccredit = true;
+            this.getIsExist()
           })
         }
       },
@@ -68,16 +70,7 @@
             this.addUser()
           }
         })
-      },
-      getOpenId() {
-        wx.cloud.callFunction({
-          name: 'user',
-          data: {}
-        }).then(res => {
-          this.openId = res.result.openid;
-          this.getIsExist()
-        })
-      },
+      }
     }
   })
 
@@ -128,7 +121,7 @@
 </style>
 <script type='application/json' lang='json'>
   {
-    "navigationBarTitleText": "发布",
+    "navigationBarTitleText": "发布"
   }
 
 </script>

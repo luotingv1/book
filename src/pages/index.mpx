@@ -1,21 +1,39 @@
 <template>
-  <view class="index">
+  <view>
     <view class='tabs'>
-      <view class="tab {{active==1?'active':''}}">男频</view>
-      <view class="tab {{active==2?'active':''}}">女频</view>
+      <view class='tabs-box'>
+        <view class="tab {{active==1?'active':''}}" bindtap='toggle(1)'>男频</view>
+        <view class="tab {{active==2?'active':''}}" bindtap='toggle(2)'>女频</view>
+      </view>
     </view>
-    <view>
-      <view class='mb-10' wx:for='{{list}}' wx:key='{{item.id}}'>
-        <i-card title="{{item.title}}" thumb="{{item.avatar}}" >
-          <view slot="content">{{item.content}}</view>
+    <view class="index" wx:if='{{!showEmptyTip}}'>
+      <view class='mb-10' wx:for='{{newList}}' wx:key='{{item.id}}'>
+        <i-card title="{{item.title}}" thumb="cloud://booklist-1hrsi.626f-booklist-1hrsi/book.png">
+          <view slot="content">
+            {{item.content}}</view>
           <view slot="footer" class='flex'>
-            <label>点赞数量{{item.like_num}}</label>
-            <label>收藏数量{{item.collect_num}}</label>
-            <label>分享数量{{item.share_num}}</label>
+            <label>
+              <i-icon type="like" bindtap="operates(item._id,1,'like')" size="18" wx:if="{{!item.islike}}" />
+              <i-icon type="like_fill" bindtap="operates(item._id,0,'like')" size="18" color='#ed3f14' wx:else />
+              {{item.like_num||0}}
+            </label>
+            <label>
+              <i-icon type="collection" bindtap="operates(item._id,1,'collect')" wx:if="{{!item.iscollect}}" size="18" />
+              <i-icon type="collection_fill" bindtap="operates(item._id,0,'collect')" size="18" wx:else color='#ff9900' />
+              {{item.collect_num||0}}</label>
+            <label>
+              <i-icon type="share_fill" size="18" />
+            </label>
           </view>
         </i-card>
       </view>
+      <i-load-more tip="暂无更多数据" wx:if='{{isLastPage}}' loading="{{ false }}" />
     </view>
+    <view wx:else class='empty-wrap'>
+      <image src='../../static/images/img-tip-empty.png' class='image-tip'></image>
+      <view class='tip-text'>暂无分享书单,快去发布吧</view>
+    </view>
+    <i-load-more wx:if='{{!canSearch}}' />
   </view>
 </template>
 
@@ -23,70 +41,116 @@
   import {
     createPage
   } from '@mpxjs/core'
+  import store from '../store/index'
   createPage({
     data: {
-      list: [{
-          id:1,
-          avatar: 'https://i.loli.net/2017/08/21/599a521472424.jpg',
-          title: "斗破苍穹",
-          content: '哈哈哈 真的好看贼好看',
-          like_num: '1',
-          share_num: '1222',
-          collect_num: '222'
-        },
-        {
-          id:2,
-          avatar: 'https://i.loli.net/2017/08/21/599a521472424.jpg',
-          title: "斗破苍穹",
-          content: '哈哈哈 真的好看贼好看',
-          like_num: '1',
-          share_num: '1222',
-          collect_num: '222'
-        },
-           {
-          id:3,
-          avatar: 'https://i.loli.net/2017/08/21/599a521472424.jpg',
-          title: "斗破苍穹",
-          content: '哈哈哈 真的好看贼好看',
-          like_num: '1',
-          share_num: '1222',
-          collect_num: '222'
-        },
-           {
-          id:4,
-          avatar: 'https://i.loli.net/2017/08/21/599a521472424.jpg',
-          title: "斗破苍穹",
-          content: '哈哈哈 真的好看贼好看',
-          like_num: '1',
-          share_num: '1222',
-          collect_num: '222'
-        },
-        {
-          id:5,
-          avatar: 'https://i.loli.net/2017/08/21/599a521472424.jpg',
-          title: "斗破苍穹",
-          content: '哈哈哈 真的好看贼好看',
-          like_num: '1',
-          share_num: '1222',
-          collect_num: '222'
-        }
-      ],
+      currentPage: 1, //当前页码
+      isLastPage: false,
+      list: [],
       db: {},
-      active: 1
+      showEmptyTip: false,
+      active: 1,
+      canSearch: true
     },
-    onLoad() {
+    computed: {
+      ...store.mapGetters([
+        'openId',
+      ]),
+      newList() {
+        let newList = [];
+        newList = this.list.map((val) => {
+          if (val.like && val.like.length > 0) {
+            for (let p of val.like) {
+              if (p.openId == this.openId) {
+                val.islike = p.type;
+                break;
+              }
+            }
+          }
+          if (val.collect && val.collect.length > 0) {
+            for (let p of val.collect) {
+              if (p.openId == this.openId) {
+                val.iscollect = p.type;
+                break;
+              }
+            }
+          }
+          return val
+        })
+        return newList
+      }
+    },
+    onReachBottom() {
+      if (this.isLastPage) {
+        return
+      };
+      this.currentPage++;
+      this._doSearch()
+    },
+    async onLoad() {
       this.db = wx.cloud.database();
-      this.getList()
+      this._doSearch()
     },
     methods: {
-      getList() {
-        // wx.showLoading({ //期间为了显示效果可以添加一个过度的弹出框提示“加载中”  
-        //     icon: 'loading',
-        // });
-        // this.db.collection('banner').get().then(res => {
-        //   wx.hideLoading();
-        //   this.list = res.data[0].bannerList;
-        // })
+      operates(id, type,name) {
+        wx.cloud.callFunction({
+            name: 'operates',
+            data: {
+              type,
+              id,
+              name
+            }
+          })
+          .then(({
+            result
+          }) => {
+            let data=result.data;
+            this.list=this.list.map((val)=>{
+              if(val._id==id){
+                val=data;
+              }
+              return val
+            })
+          })
+      },
+      toggle(val) {
+        this.active = val;
+        this.list = [];
+        this.currentPage = 1;
+        this.showEmptyTip = false;
+        this.isLastPage = false;
+        this.canSearch = true;
+        this._doSearch();
+      },
+      _doSearch() {
+        if (!this.canSearch) return;
+        this.canSearch = false;
+        let data_search = {
+          "dbName": 'bookLists',
+          "filter": {
+            "sex": this.active == 1 ? '男频' : '女频'
+          },
+          "pageIndex": this.currentPage,
+          "perPage": 5
+        }
+        wx.cloud.callFunction({
+            name: 'pagination',
+            data: data_search
+          })
+          .then(({
+            result
+          }) => {
+            let data = result.data;
+            if (this.currentPage == 1 && !data.length) {
+              // 显示列表为空
+              this.showEmptyTip = true;
+              this.canSearch = true;
+            } else {
+              this.canSearch = true;
+              this.isLastPage = !result.hasMore;
+              this.list = [...this.list, ...data];
+            }
+          })
       }
     },
     onShareAppMessage: (res) => {
@@ -100,19 +164,27 @@
 
 <style lang="scss" scoped>
   .index {
-    padding-top: 90rpx;
+    padding-top: 100rpx;
   }
 
   .tabs {
-    margin-top: 26rpx;
     position: fixed;
     top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    border: 1rpx solid #5cadff;
-    font-size: 0;
-    border-radius:5rpx;
-    overflow:hidden;
+    width: 100%;
+    height: 90rpx;
+    text-align: center;
+    background: #fff;
+    z-index: 1;
+
+    .tabs-box {
+      margin-top: 26rpx;
+      display: inline-block;
+      border: 1rpx solid #5cadff;
+      overflow: hidden;
+      font-size: 0;
+      border-radius: 5rpx;
+    }
+
     .tab {
       display: inline-block;
       width: 120rpx;
@@ -142,7 +214,10 @@
   {
     "navigationBarTitleText": "书友圈",
     "usingComponents": {
-      "i-card": "../components/iview/card"
+      "i-card": "../components/iview/card",
+      "i-load-more": "../components/iview/load-more",
+      "i-avatar": "../components/iview/avatar",
+      "i-icon": "../components/iview/icon"
     }
   }
 

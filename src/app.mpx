@@ -1,19 +1,16 @@
 <script>
   // app.js
   import mpx from '@mpxjs/core'
-import apiProxy from '@mpxjs/api-proxy'
-
-mpx.use(apiProxy, {
-  usePromise: true
-})
+  import apiProxy from '@mpxjs/api-proxy'
+  import store from './store/index'
+  mpx.use(apiProxy, {
+    usePromise: true
+  })
   import {
     createApp
   } from '@mpxjs/core'
   createApp({
     onLaunch() {
-      wx.cloud.init({
-        env: 'booklist-1hrsi'
-      })
       // 检测小程序是否有新版本更新
       if (wx.canIUse('getUpdateManager')) {
         const updateManager = wx.getUpdateManager()
@@ -50,62 +47,68 @@ mpx.use(apiProxy, {
           content: '当前微信版本过低，无法使用该功能，请升级到最新微信版本后重试。'
         })
       }
-    }
+      wx.cloud.init({
+        env: 'booklist-1hrsi'
+      })
+      store.dispatch('getOpenId')
+      store.dispatch('getClassify')
+    },
   })
 
 </script>
 
 <style lang="scss">
-@import '../static/css/app.less';
+  @import '../static/css/app.less';
+
 </style>
 <script type="application/json">
- {
-  "pages": [
-    "./pages/publish",
-    "./pages/publishBook",
-    "./pages/addBook",
-    "./pages/personal",
-    "./pages/index"
-  ],
-  "window": {
-    "backgroundTextStyle": "light",
-    "navigationBarBackgroundColor": "#fff",
-    "navigationBarTitleText": "书单圈",
-    "navigationBarTextStyle": "black",
-    "backgroundColor": "#F6F6F6",
-    "backgroundTextStyle": "dark",
-    "enablePullDownRefresh": false
-  },
-  "tabBar": {
-    "color": "#5A5A5A",
-    "selectedColor": "#5cadff",
-    "borderStyle": "white",
-    "backgroundColor": "#ffffff",
-     "borderStyle": "black",
-    "list": [
-      {
+  {
+    "pages": [
+      "./pages/index",
+      "./pages/publishBook",
+      "./pages/addBook",
+      "./pages/publish",
+      "./pages/personal"
+    ],
+    "window": {
+      "backgroundTextStyle": "light",
+      "navigationBarBackgroundColor": "#fff",
+      "navigationBarTitleText": "书单圈",
+      "navigationBarTextStyle": "black",
+      "backgroundColor": "#F6F6F6",
+      "backgroundTextStyle": "dark",
+      "enablePullDownRefresh": false
+    },
+    "tabBar": {
+      "color": "#5A5A5A",
+      "selectedColor": "#5cadff",
+      "borderStyle": "white",
+      "backgroundColor": "#ffffff",
+      "borderStyle": "black",
+      "list": [{
           "pagePath": "pages/index",
           "iconPath": "../static/images/shuyou.png",
           "selectedIconPath": "../static/images/shuyou1.png",
           "text": "广场"
-      },
-      {
+        },
+        {
           "pagePath": "pages/publish",
           "iconPath": "../static/images/fabu.png",
           "selectedIconPath": "../static/images/fabu1.png",
           "text": "发布"
-      },
-      {
+        },
+        {
           "pagePath": "pages/personal",
           "iconPath": "../static/images/my.png",
           "selectedIconPath": "../static/images/my1.png",
           "text": "我的"
-      }
-    ]
-  },
-  "usingComponents":{
-    "i-button": "./components/iview/button"
-  },
-  "cloud": true
-}
+        }
+      ]
+    },
+    "usingComponents": {
+      "i-button": "./components/iview/button"
+    },
+    "cloud": true
+  }
+
 </script>

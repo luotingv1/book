@@ -20,13 +20,13 @@
     </view>
     <i-cell title="{{item.name}}" value='{{item.classifyName}}' wx:key='{{item.classifyId}}' wx:for='{{shudan.books}}'>
     </i-cell>
-    <i-button bind:click="save" type='info' i-class='btn'>保存书单</i-button>
+    <i-button bind:click="save" type='info' i-class='btn' long="true">保存书单</i-button>
     <i-modal visible="{{ visible }}" bind:ok="add" bind:cancel="handleClose">
       <i-input title='书名' placeholder="填写书名《XXX》" type='text' maxlength='20' bind:change="changebookname"
         value='{{book.name}}' />
       <view class="picker-classify">
         <label class="picker-title">选择分类</label>
-        <picker bindchange="bindPickerChange" value="{{index}}" range="{{array}}" range-key='name' class='picker'>
+        <picker bindchange="bindPickerChange" value="{{index}}" range="{{classify}}" range-key='name' class='picker'>
           <view class="picker">{{book.classifyName}}</view>
         </picker>
       </view>
@@ -35,10 +35,13 @@
 </template>
 
 <script>
-const { $Toast } = require('../components/iview/base/index');
-  import mpx,{
+  const {
+    $Toast
+  } = require('../components/iview/base/index');
+  import mpx, {
     createPage
   } from '@mpxjs/core'
+  import store from '../store/index'
   createPage({
     data: {
       userInfo: {},
@@ -50,36 +53,6 @@ const { $Toast } = require('../components/iview/base/index');
         books: []
       },
       index: 0,
-      array: [{
-          id: "",
-          name: '请选择分类'
-        },
-        {
-          id: 1,
-          name: '玄幻奇幻'
-        }, {
-          id: 2,
-          name: '同人小说'
-        }, {
-          id: 3,
-          name: '武侠仙侠'
-        }, {
-          id: 4,
-          name: '都市言情'
-        }, {
-          id: 5,
-          name: '历史军事'
-        }, {
-          id: 6,
-          name: '科幻灵异'
-        }, {
-          id: 7,
-          name: '网游竞技'
-        }, {
-          id: 8,
-          name: '女生频道'
-        }
-      ],
       book: {
         name: "",
         classifyId: "",
@@ -88,27 +61,54 @@ const { $Toast } = require('../components/iview/base/index');
     },
     onLoad() {
       // 所在页面显示之后就会执行一次
-        mpx.getUserInfo().then((res)=>{
-           this.userInfo = res.userInfo
-        })
+      mpx.getUserInfo().then((res) => {
+        this.userInfo = res.userInfo
+      })
+    },
+    computed: {
+      ...store.mapGetters([
+        'openId',
+        'classify',
+      ])
     },
     methods: {
       save() {
-        for(let val of Object.values(this.shudan)){
-          if(val.length==0){
-              $Toast({
-                content: '请完成书单填写',
-                type: 'warning'
+        for (let val of Object.values(this.shudan)) {
+          if (val.length == 0) {
+            $Toast({
+              content: '请完成书单填写',
+              type: 'warning'
             });
-             return;
+            return;
           }
         }
         //保存到数据库
+         let shudan = JSON.parse(JSON.stringify(this.shudan))
+        shudan.openId = this.openId;
+        shudan.avatarUrl=this.userInfo.avatarUrl;
+        let db = wx.cloud.database()
+        let bookLists = db.collection('bookLists');
+        bookLists.add({
+          data: shudan,
+          success: (res) => {
+            $Toast({
+              content: '添加成功',
+              type: 'success',
+              duration: 1,
+              mask: false
+            });
+            setTimeout(() => {
+              wx.navigateBack({
+                delta: 1
+              })
+            }, 1000);
+          }
+        })
       },
       bindPickerChange(e) {
         this.index = e.detail.value;
-        this.book.classifyId = this.array[this.index].id;
-        this.book.classifyName = this.array[this.index].name;
+        this.book.classifyId = this.classify[this.index].id;
+        this.book.classifyName = this.classify[this.index].name;
       },
       changeVal(value, e) {
         this.shudan[value] = e.detail.detail.value;
@@ -143,9 +143,10 @@ const { $Toast } = require('../components/iview/base/index');
 </script>
 
 <style lang='scss' scoped>
-.container{
-  padding-bottom: 88rpx;
-}
+  .container {
+    padding-bottom: 88rpx;
+  }
+
   .nick {
     padding: 0 30rpx;
   }
@@ -164,10 +165,10 @@ const { $Toast } = require('../components/iview/base/index');
 
   button.btn {
     position: fixed;
-    bottom:0;
-    left:0;
-    right:0;
-    margin:0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: 0;
   }
 
   .radio {
@@ -211,7 +212,6 @@ const { $Toast } = require('../components/iview/base/index');
       "i-avatar": "../components/iview/avatar",
       "i-input": "../components/iview/input",
       "i-panel": "../components/iview/panel",
-      "i-button": "../components/iview/button",
       "i-radio-group": "../components/iview/radio-group",
       "i-radio": "../components/iview/radio",
       "i-modal": "../components/iview/modal",

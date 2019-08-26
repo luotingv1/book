@@ -6,10 +6,11 @@
       <view class='f15 text-c'>添加</view>
     </view>
     <view wx:else>
-      <i-input title='书名' placeholder="填写书名《XXX》" type='text' maxlength='20' value='{{book.name}}' bind:change="onChangebook"/>
+      <i-input title='书名' placeholder="填写书名《XXX》" type='text' maxlength='20' value='{{book.name}}'
+        bind:change="onChangebook" />
       <view class="picker-classify">
         <label class="picker-title">选择分类</label>
-        <picker bindchange="bindPickerChange" value="{{index}}" range="{{array}}" range-key='name' class='picker'>
+        <picker bindchange="bindPickerChange" value="{{index}}" range="{{classify}}" range-key='name' class='picker'>
           <view class="picker">{{book.classifyName}}</view>
         </picker>
       </view>
@@ -32,40 +33,11 @@
   import {
     createPage
   } from '@mpxjs/core'
+  import store from '../store/index'
   createPage({
     data: {
-      isEdit: true,
+      isEdit: false,
       index: 0,
-      array: [{
-          id: "",
-          name: '请选择分类'
-        },
-        {
-          id: 1,
-          name: '玄幻奇幻'
-        }, {
-          id: 2,
-          name: '同人小说'
-        }, {
-          id: 3,
-          name: '武侠仙侠'
-        }, {
-          id: 4,
-          name: '都市言情'
-        }, {
-          id: 5,
-          name: '历史军事'
-        }, {
-          id: 6,
-          name: '科幻灵异'
-        }, {
-          id: 7,
-          name: '网游竞技'
-        }, {
-          id: 8,
-          name: '女生频道'
-        }
-      ],
       book: {
         name: "",
         isRead: false,
@@ -73,36 +45,69 @@
         classifyName: "请添加分类"
       }
     },
+    computed: {
+      ...store.mapGetters([
+        'openId',
+        'classify',
+      ])
+    },
     methods: {
-      onChangebook({detail}){
-        this.book.name=detail.detail.value;
+      onChangebook({
+        detail
+      }) {
+        this.book.name = detail.detail.value;
       },
       onChange(e) {
         let detail = e.detail;
-        this.book.isRead=detail.value;
+        this.book.isRead = detail.value;
       },
       save() {
-        for(let val of Object.values(this.book)){
-          if(val){
-              $Toast({
-                content: '请完成书籍信息填写',
-                type: 'warning'
+        for (let val of Object.entries(this.book)) {
+          if (!val[1] && val[0] != 'isRead') {
+            $Toast({
+              content: '请完成书籍信息填写',
+              type: 'warning'
             });
             return;
           }
         }
-        console.log(this.book);
+        let book = JSON.parse(JSON.stringify(this.book))
+        book.openId = this.openId;
+        let db = wx.cloud.database()
+        let myBooks = db.collection('myBooks');
+        myBooks.add({
+          data: book,
+          success: (res) => {
+            $Toast({
+              content: '添加成功',
+              type: 'success',
+              duration: 1,
+              mask: false
+            });
+            setTimeout(() => {
+              wx.navigateBack({
+                delta: 1
+              })
+            }, 1000);
+          }
+        })
       },
       edit() {
         this.isEdit = true;
       },
       cancel() {
         this.isEdit = false;
+        this.book = {
+          name: "",
+          isRead: false,
+          classifyId: "",
+          classifyName: "请添加分类"
+        }
       },
       bindPickerChange(e) {
         this.index = e.detail.value;
-        this.book.classifyId = this.array[this.index].id;
-        this.book.classifyName = this.array[this.index].name;
+        this.book.classifyId = this.classify[this.index].id;
+        this.book.classifyName = this.classify[this.index].name;
       }
     }
   })
@@ -179,7 +184,6 @@
     "usingComponents": {
       "i-modal": "../components/iview/modal",
       "i-toast": "../components/iview/toast",
-      "i-button": "../components/iview/button",
       "i-input": "../components/iview/input",
       "i-switch": "../components/iview/switch"
     }
