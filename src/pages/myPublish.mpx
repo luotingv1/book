@@ -1,0 +1,125 @@
+<template>
+  <view>
+    <view class="index" wx:if='{{!showEmptyTip}}'>
+      <view wx:for="{{list}}" wx:key='{{item._id}}' class='swipe'>
+        <view class='swipe-tip'>含{{item.books.length}}本书·被收藏{{item.collect_num}}次</view>
+        <i-swipeout i-class="i-swipeout" operateWidth="{{60}}" unclosable="{{true}}" toggle="{{toggle}}">
+          <view slot="content" bindtap='goToDetail(item._id)'>
+            <view class='swipe-title alignCenter'>
+              <i-icon type="label_fill" color='#ed3f14' size='18' />
+              <text>{{item.title}}</text>
+            </view>
+            <view class='swipe-content'>{{item.content}}</view>
+          </view>
+          <view class='action' slot="button">
+            <i-icon size="26" type="delete" color='#fff' bindtap="actionsTap(item._id,index)"></i-icon>
+          </view>
+        </i-swipeout>
+      </view>
+      <i-load-more tip="暂无更多数据" wx:if='{{isLastPage}}' loading="{{ false }}" />
+    </view>
+    <view wx:else class='empty-wrap'>
+      <image src='../../static/images/img-tip-empty.png' class='image-tip'></image>
+      <view class='tip-text'>暂无发布书单,快去发布吧{{openId}}</view>
+    </view>
+    <i-load-more wx:if='{{!canSearch}}' />
+  </view>
+</template>
+
+<script>
+  import {
+    createPage
+  } from '@mpxjs/core'
+  import store from '../store/index'
+  createPage({
+    data: {
+      currentPage: 1, //当前页码
+      isLastPage: false,
+      list: [],
+      db: {},
+      toggle:false,
+      showEmptyTip: false,
+      canSearch: true
+    },
+    computed: {
+      ...store.mapGetters([
+        'openId',
+      ])
+    },
+    onReachBottom() {
+      if (this.isLastPage) {
+        return
+      };
+      this.currentPage++;
+      this._doSearch()
+    },
+    async onLoad() {
+      this.db = wx.cloud.database();
+      this._doSearch();
+    },
+    methods: {
+      actionsTap(id,index){
+        this.db.collection('bookLists').doc(id).remove().then(()=>{
+          this.list.splice(index,1);
+          this.toggle=!this.toggle;
+        })
+      },
+      goToDetail(id) {
+        wx.navigateTo({
+          url: `/pages/bookDetail?id=${id}`
+        })
+      },
+      _doSearch() {
+        if (!this.canSearch) return;
+        if(!this.openId){
+          setTimeout(() => {
+            this._doSearch()
+          }, 500);
+          return;
+        }
+        this.canSearch = false;
+        let data_search = {
+          "dbName": 'bookLists',
+          "filter": {
+            "_openid": this.openId
+          },
+          "pageIndex": this.currentPage,
+          "perPage": 5
+        }
+        wx.cloud.callFunction({
+            name: 'pagination',
+            data: data_search
+          })
+          .then(({
+            result
+          }) => {
+            let data = result.data;
+            if (this.currentPage == 1 && !data.length) {
+              // 显示列表为空
+              this.showEmptyTip = true;
+              this.canSearch = true;
+            } else {
+              this.canSearch = true;
+              this.isLastPage = !result.hasMore;
+              this.list = [...this.list, ...data];
+            }
+          })
+      }
+    }
+  })
+
+</script>
+
+
+
+<script type="application/json">
+  {
+    "navigationBarTitleText": "书友圈",
+    "usingComponents": {
+      "i-swipeout": "../components/iview/swipeout",
+      "i-load-more": "../components/iview/load-more",
+      "i-icon": "../components/iview/icon"
+    }
+  }
+
+</script>

@@ -49,9 +49,7 @@
     data: {
       currentPage: 1, //当前页码
       isLastPage: false,
-      list: [{
-        _id: 111
-      }],
+      list: [],
       db: {},
       _lastTime: 0,
       showEmptyTip: false,

@@ -1,68 +1,58 @@
 <template minapp='native' xlang='wxml'>
   <view class='container'>
-    <i-alert closable wx:if='{{show}}'>左滑删除书单</i-alert>
-    <view wx:for="{{list}}" wx:key='{{item._id}}' class='swipe'>
-      <view class='swipe-tip'>含{{item.book.length}}本书·被收藏{{item.collect_num}}次</view>
-      <i-swipeout i-class="i-swipeout" operateWidth="{{60}}" unclosable="{{true}}" toggle="{{toggle}}">
-        <view slot="content" bindtap='goToDetail(item._id)'>
-          <view class='swipe-title alignCenter'>
-            <i-icon type="label_fill" color='#ed3f14' size='18' />
-            <text>{{item.title}}</text>
+    <i-message id="message"  />
+    <block wx:if='{{list.length>0}}'>
+      <view wx:for="{{list}}" wx:key='{{item._id}}' class='swipe'>
+        <view class='swipe-tip'>含{{item.books.length}}本书·被收藏{{item.collect_num}}次</view>
+        <i-swipeout i-class="i-swipeout" operateWidth="{{60}}" unclosable="{{true}}" toggle="{{toggle}}">
+          <view slot="content" bindtap='goToDetail(item._id)'>
+            <view class='swipe-title alignCenter'>
+              <i-icon type="label_fill" color='#ed3f14' size='18' />
+              <text>{{item.title}}</text>
+            </view>
+            <view class='swipe-content'>{{item.content}}</view>
           </view>
-          <view class='swipe-content'>{{item.content}}</view>
-        </view>
-        <view class='action' slot="button">
-          <i-icon size="26" type="delete" color='#fff' bindtap="actionsTap(item._id)"></i-icon>
-        </view>
-      </i-swipeout>
+          <view class='action' slot="button">
+            <i-icon size="26" type="delete" color='#fff' bindtap="actionsTap(item._id,index)"></i-icon>
+          </view>
+        </i-swipeout>
+      </view>
+    </block>
+    <view wx:else class='empty-wrap'>
+      <image src='../../static/images/img-tip-empty.png' class='image-tip'></image>
+      <view class='tip-text'>暂无收藏书单,快去收藏吧</view>
     </view>
   </view>
 </template>
 
 <script>
+  const {
+    $Message
+  } = require('../components/iview/base/index');
   import {
     createPage
   } from '@mpxjs/core'
   createPage({
     data: {
       show: true,
-      list: [{
-          avatarUrl: "https://wx.qlogo.cn/mmopen/vi_32/DYAIOgq83eojG9TJlgyBORIvU8icJ1j0nXAjib4klZpo4pNefjDm9ia12JtK3WQR2YLqY0OONdfZq7ibicNxfU8f4XQ/132",
-          collect_num: 1,
-          content: "是发送到防守打法萨达刚阿三哥阿萨德刚",
-          like_num: 1,
-          sex: "男频",
-          title: "地方",
-          book: [1],
-          _id: "3c4c6d855d5e36aa065bfd7b2e67d18f",
-          _openid: "oDtEg5cjUyEHCpO5ZXOC09sfT1qE"
-        },
-        {
-          avatarUrl: "https://wx.qlogo.cn/mmopen/vi_32/DYAIOgq83eojG9TJlgyBORIvU8icJ1j0nXAjib4klZpo4pNefjDm9ia12JtK3WQR2YLqY0OONdfZq7ibicNxfU8f4XQ/132",
-          collect_num: 1,
-          content: "是发送到防守打法萨达刚阿三哥阿萨德刚",
-          like_num: 1,
-          sex: "男频",
-          book: [1],
-          title: "地方",
-          _id: "3c4c6d855d5e36aa065bfd7b2e67d18f",
-          _openid: "oDtEg5cjUyEHCpO5ZXOC09sfT1qE"
-        }
-      ],
+      list: [],
       toggle: false
     },
     async onLoad() {
       // 所在页面显示之后就会执行一次
-      // wx.cloud.callFunction({
-      //   name: 'getCollects'
-      // }).then(({
-      //   result
-      // }) => {
-      //   this.list = result ? result : [];
-      // })
-      setTimeout(() => {
-        this.show = false;
-      }, 1400);
+      wx.cloud.callFunction({
+        name: 'getCollects'
+      }).then(({
+        result
+      }) => {
+        this.list = result ? result : [];
+        if (this.list.length > 0) {
+          $Message({
+            content: '左滑删除书单',
+            duration: 2
+          });
+        }
+      })
     },
     methods: {
       goToDetail(id) {
@@ -70,65 +60,34 @@
           url: `/pages/bookDetail?id=${id}`
         })
       },
-      actionsTap(id) {
-        let db = wx.cloud.database();
-        db.collection('user')
+      actionsTap(id, index) {
+        wx.cloud.callFunction({
+            name: 'operates',
+            data: {
+              type: 0,
+              id,
+              name: 'collect'
+            }
+          })
+          .then(({
+            result
+          }) => {
+            this.toggle = !this.toggle;
+            this.list.splice(index, 1)
+          })
       }
     }
   })
 
 </script>
 
-<style lang='scss'>
-  .action {
-    display: flex;
-    height: 100%;
-    background: #5cadff;
-    justify-content: center;
-    align-items: center;
-  }
 
-  .swipe {
-    box-shadow: 0 8rpx 16rpx -8rpx rgba(0, 0, 0, 0.4);
-    border: 1px solid #dddee1;
-    margin: 30rpx;
-    border-radius: 20rpx;
-
-    .i-swipeout {
-      border-top: 1px solid #dddee1;
-      margin-top: 20rpx;
-      border-radius: 0 0 20rpx 20rpx;
-    }
-
-    .swipe-tip {
-      margin-top: 20rpx;
-      font-size: 26rpx;
-      color: #80848f;
-      text-align: center;
-    }
-
-    .swipe-title {
-      font-size: 34rpx;
-      color: #ed3f14;
-      margin-bottom: 10rpx;
-
-      text {
-        margin-left: 8rpx;
-      }
-    }
-
-    .swipe-content {
-      color: #495060;
-    }
-  }
-
-</style>
 <script type='application/json' lang='json'>
   {
     "navigationBarTitleText": "我的收藏",
     "usingComponents": {
       "i-swipeout": "../components/iview/swipeout",
-      "i-alert": "../components/iview/alert",
+      "i-message": "../components/iview/message",
       "i-icon": "../components/iview/icon"
     }
   }

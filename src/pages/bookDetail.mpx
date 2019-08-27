@@ -119,7 +119,6 @@
             .then(({
               result
             }) => {
-              console.log(result);
               this.list = result.data;
             })
           this._lastTime = _nowTime;

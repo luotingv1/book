@@ -60,13 +60,13 @@
 
 <style lang="scss">
   @import '../static/css/app.less';
-
 </style>
 <script type="application/json">
   {
     "pages": [
-      "./pages/myCollect",
       "./pages/personal",
+      "./pages/myPublish",
+      "./pages/myCollect",
       "./pages/bookDetail",
       "./pages/publish",
       "./pages/index",
