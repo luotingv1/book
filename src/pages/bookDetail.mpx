@@ -62,21 +62,10 @@
       _lastTime: 0,
       list: {}
     },
-    onLoad({
-      id = '5d262bd45d5e36aa065f4da222c9d497'
-    }) {
-      // 所在页面显示之后就会执行一次
-      wx.cloud.callFunction({
-          name: 'getBookDetail',
-          data: {
-            id
-          }
-        })
-        .then(({
-          result
-        }) => {
-          this.list = result;
-        })
+    async onLoad({id}) {
+      let db=wx.cloud.database()
+      let detail=await db.collection('bookLists').doc(id).get();
+       this.list = detail.data;
     },
     computed: {
        ...store.mapGetters([

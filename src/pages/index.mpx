@@ -96,7 +96,7 @@
     },
     async onLoad() {
       this.db = wx.cloud.database();
-      // this._doSearch()
+      this._doSearch();
     },
     methods: {
       share() {
