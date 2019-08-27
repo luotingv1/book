@@ -7,22 +7,25 @@
       </view>
     </view>
     <view class="index" wx:if='{{!showEmptyTip}}'>
-      <view class='mb-10' wx:for='{{newList}}' wx:key='{{item.id}}'>
-        <i-card title="{{item.title}}" thumb="cloud://booklist-1hrsi.626f-booklist-1hrsi/book.png">
+      <view class='mb-10' wx:for='{{newList}}' wx:key='{{item._id}}' bindtap='goToDetail(item._id)'>
+        <i-card title="{{item.title}}" thumb="cloud://booklist-1hrsi.626f-booklist-1hrsi/book.jpg">
           <view slot="content">
             {{item.content}}</view>
           <view slot="footer" class='flex'>
             <label>
-              <i-icon type="like" bindtap="operates(item._id,1,'like')" size="18" wx:if="{{!item.islike}}" />
-              <i-icon type="like_fill" bindtap="operates(item._id,0,'like')" size="18" color='#ed3f14' wx:else />
+              <i-icon type="like" catchtap="operates(item._id,1,'like')" size="18" wx:if="{{!item.islike}}" />
+              <i-icon type="like_fill" catchtap="operates(item._id,0,'like')" size="18" color='#ed3f14' wx:else />
               {{item.like_num||0}}
             </label>
             <label>
-              <i-icon type="collection" bindtap="operates(item._id,1,'collect')" wx:if="{{!item.iscollect}}" size="18" />
-              <i-icon type="collection_fill" bindtap="operates(item._id,0,'collect')" size="18" wx:else color='#ff9900' />
+              <i-icon type="collection" catchtap="operates(item._id,1,'collect')" wx:if="{{!item.iscollect}}"
+                size="18" />
+              <i-icon type="collection_fill" catchtap="operates(item._id,0,'collect')" size="18" wx:else
+                color='#ff9900' />
               {{item.collect_num||0}}</label>
             <label>
-              <i-icon type="share_fill" size="18" />
+              <button open-type="share" id='{{item._id}}' catchtap='share' hover-class="none" class='share-btn'>
+                <i-icon type="share_fill" size="18" /></button>
             </label>
           </view>
         </i-card>
@@ -46,8 +49,11 @@
     data: {
       currentPage: 1, //当前页码
       isLastPage: false,
-      list: [],
+      list: [{
+        _id: 111
+      }],
       db: {},
+      _lastTime: 0,
       showEmptyTip: false,
       active: 1,
       canSearch: true
@@ -55,6 +61,7 @@
     computed: {
       ...store.mapGetters([
         'openId',
+        'isAccredit'
       ]),
       newList() {
         let newList = [];
@@ -89,29 +96,47 @@
     },
     async onLoad() {
       this.db = wx.cloud.database();
-      this._doSearch()
+      // this._doSearch()
     },
     methods: {
-      operates(id, type,name) {
-        wx.cloud.callFunction({
-            name: 'operates',
-            data: {
-              type,
-              id,
-              name
-            }
+      share() {
+        return;
+      },
+      goToDetail(id) {
+        wx.navigateTo({
+          url: `/pages/bookDetail?id=${id}`
+        })
+      },
+      operates(id, type, name) {
+        if (!this.isAccredit) {
+          wx.navigateTo({
+            url: `/pages/login`
           })
-          .then(({
-            result
-          }) => {
-            let data=result.data;
-            this.list=this.list.map((val)=>{
-              if(val._id==id){
-                val=data;
+          return;
+        }
+        let _nowTime = new Date().getTime()
+        if (_nowTime - this._lastTime > 1000 || !this._lastTime) {
+          wx.cloud.callFunction({
+              name: 'operates',
+              data: {
+                type,
+                id,
+                name
               }
-              return val
             })
-          })
+            .then(({
+              result
+            }) => {
+              let data = result.data;
+              this.list = this.list.map((val) => {
+                if (val._id == id) {
+                  val = data;
+                }
+                return val
+              })
+            })
+          this._lastTime = _nowTime;
+        }
       },
       toggle(val) {
         this.active = val;
@@ -155,7 +180,7 @@
     },
     onShareAppMessage: (res) => {
       return {
-        path: '/pages/index'
+        path: `/pages/bookDetail?id=${res.target.id}`
       }
     }
   })
@@ -201,6 +226,15 @@
       }
     }
 
+  }
+
+  .share-btn {
+    padding: 0;
+    border: none;
+    border-color: transparent;
+    line-height: 0;
+    background: transparent;
+    color: #80848f;
   }
 
   .flex {

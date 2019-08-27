@@ -4,11 +4,11 @@ const db = cloud.database();
 const _ = db.command;
 exports.main = async (event, context) => {
   try {
-    console.log(event);
     // wxContext内包含用户的openId
     const wxContext = cloud.getWXContext()
     const openId = wxContext.OPENID; //获取openID
     let record = await db.collection('bookLists').doc(event.id).get() //查询符合id的书单记录
+    record=record.data;
     let arrName = event.name;
     // 定义空数组
     let arr = [];
@@ -42,13 +42,43 @@ exports.main = async (event, context) => {
       })
     }
     // 通过云开发操作数据库的相关api,即update通过_id来更新集合中某条数据
-
     let obj = {
       data: {
         [arrName]: arr,
         [arrName + '_num']: event.type == 1 ? _.inc(1) : _.inc(-1)
       }
     };
+    let collect=await db.collection('user').where({_openid:openId}).get();//获取用户记录
+    //判断用户是否存储过该操作信息
+    collect=collect.data[0];
+    let arr2=[];
+    if(collect[arrName]&&collect[arrName].length>0){
+          // 循环遍历 如果有记录删除 如果没有记录添加  因为只有type为1才会添加
+          arr2=collect[arrName];
+          let count = 0
+          arr2.forEach((item, index) => {
+            if (item[arrName+'_id'] === event.id) {
+              count++;
+              if(event.type==1){
+                arr2.splice(index, 1,{
+                  [arrName+'_id']: event.id
+                })
+              }else{
+                arr2.splice(index, 1)
+              }
+            }
+          })
+          if (count === 0&&event.type==1) {
+            arr2.push({
+              [arrName+'_id']: event.id
+            })
+          }
+    }else if(event.type==1){
+      arr2.push({
+        [arrName+'_id']: event.id
+      })
+    }
+    db.collection('user').doc(collect._id).update({data:{[arrName]:arr2}});
      await db.collection('bookLists').doc(event.id).update(obj);
      return await db.collection('bookLists').doc(event.id).get();
   } catch (e) {

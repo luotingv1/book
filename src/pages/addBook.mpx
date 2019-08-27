@@ -72,7 +72,6 @@
           }
         }
         let book = JSON.parse(JSON.stringify(this.book))
-        book.openId = this.openId;
         let db = wx.cloud.database()
         let myBooks = db.collection('myBooks');
         myBooks.add({

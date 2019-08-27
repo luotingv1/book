@@ -50,8 +50,9 @@
       wx.cloud.init({
         env: 'booklist-1hrsi'
       })
-      store.dispatch('getOpenId')
-      store.dispatch('getClassify')
+      store.dispatch('getOpenId');
+      store.dispatch('getAccredit');
+      store.dispatch('getClassify');
     },
   })
 
@@ -64,11 +65,13 @@
 <script type="application/json">
   {
     "pages": [
-      "./pages/index",
-      "./pages/publishBook",
-      "./pages/addBook",
+      "./pages/personal",
+      "./pages/bookDetail",
       "./pages/publish",
-      "./pages/personal"
+      "./pages/index",
+      "./pages/login",
+      "./pages/publishBook",
+      "./pages/addBook"
     ],
     "window": {
       "backgroundTextStyle": "light",

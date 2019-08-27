@@ -84,8 +84,8 @@
         }
         //保存到数据库
          let shudan = JSON.parse(JSON.stringify(this.shudan))
-        shudan.openId = this.openId;
         shudan.avatarUrl=this.userInfo.avatarUrl;
+        shudan.nickName=this.userInfo.nickName;
         let db = wx.cloud.database()
         let bookLists = db.collection('bookLists');
         bookLists.add({

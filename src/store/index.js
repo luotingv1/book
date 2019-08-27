@@ -5,7 +5,8 @@ import {
 const store = createStore({
   state: {
     openId: null,
-    classify: []
+    classify: [],
+    isAccredit:false
   },
   getters: {
     openId(state) {
@@ -13,6 +14,9 @@ const store = createStore({
     },
     classify(state) {
       return state.classify
+    },
+    isAccredit(state) {
+      return state.isAccredit
     }
   },
   mutations: {
@@ -21,14 +25,24 @@ const store = createStore({
     },
     setClassify(state, data) {
       state.classify = data;
+    },
+    setAccredit(state, data){
+      state.isAccredit=data ? true : false;
     }
   },
   actions: {
-    async getOpenId(context) {
+     getOpenId(context) {
       wx.cloud.callFunction({
         name: 'user'
       }).then(res => {
         context.commit('setOpenId', res.result.openid);
+      })
+    },
+    getAccredit(context){
+      wx.getSetting({
+        success: (res) => {
+          context.commit('setAccredit', res.authSetting['scope.userInfo'])
+        }
       })
     },
     getClassify(context) {

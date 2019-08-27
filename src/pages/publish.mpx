@@ -1,19 +1,16 @@
 <template minapp='native' xlang='wxml'>
   <view class='container'>
     <view class='flex'>
-      <block wx:if='{{isAccredit}}'>
-        <navigator url="addBook" open-type="navigate" hover-class="none" class='flex-item'>
-          <image src="../../static/images/shudan.png" mode="scaleToFill" class='image-item'></image>
-          <view>添加书籍</view>
-        </navigator>
-        <navigator url="publishBook" open-type="navigate" hover-class="none" class='flex-item'>
-          <image src="../../static/images/fabuicon.png" mode="scaleToFill" class='image-item shadow1'></image>
-          <view>分享书单</view>
-        </navigator>
-      </block>
-      <i-button wx:else bindgetuserinfo="getUserAuthorize" open-type="getUserInfo" type="info" hover-class="none"
-        size="small">点击发布</i-button>
+      <view bindtap="ng('addBook')" class='flex-item'>
+        <image src="../../static/images/shudan.png" mode="scaleToFill" class='image-item'></image>
+        <view>添加书籍</view>
+      </view>
+      <view bindtap="ng('publishBook')" class='flex-item'>
+        <image src="../../static/images/fabuicon.png" mode="scaleToFill" class='image-item shadow1'></image>
+        <view>分享书单</view>
+      </view>
     </view>
+    <i-modal title="请先登录" visible="{{ visible }}"  bind:ok="ng('login')" bind:cancel="handleClose"></i-modal>
   </view>
 </template>
 
@@ -25,51 +22,31 @@
   createPage({
     data: {
       isAccredit: true,
-      db: null
-    },
-    computed: {
-      openId(){
-        return store.getters.openId;
-      }
+      visible:false
     },
     onLoad() {
-      this.db = wx.cloud.database();
-    },
-    onShow() {
       // 所在页面显示之后就会执行一次
       wx.getSetting({
         success: (res) => {
           this.isAccredit = res.authSetting['scope.userInfo'] ? true : false;
+          if(!this.isAccredit){
+           this.visible=true;
+          }
         }
       })
     },
     methods: {
-      getUserAuthorize(e) {
-        if (e.detail.errMsg === 'getUserInfo:ok') {
-          mpx.getUserInfo().then((res) => {
-            this.userInfo = res.userInfo;
-            this.isAccredit = true;
-            this.getIsExist()
+      handleClose(){
+        this.visible=false;
+      },
+      ng(url) {
+        if (this.isAccredit||url=='login') {
+          wx.navigateTo({
+            url: `/pages/${url}`
           })
+        }else{
+          this.visible=true;
         }
-      },
-      addUser() {
-        let user = this.db.collection('user')
-        user.add({
-          data: {
-            user: this.userInfo
-          }
-        })
-      },
-      getIsExist() {
-        let user = this.db.collection('user')
-        user.where({
-          _openid: this.openId
-        }).get().then(res => {
-          if (res.data.length === 0) {
-            this.addUser()
-          }
-        })
       }
     }
   })
@@ -94,11 +71,6 @@
       border: 0;
       font-size: 0;
     }
-
-    button.flex-item {
-      padding: 0;
-      line-height: 1;
-    }
   }
 
   .image-item {
@@ -121,7 +93,10 @@
 </style>
 <script type='application/json' lang='json'>
   {
-    "navigationBarTitleText": "发布"
+    "navigationBarTitleText": "发布",
+    "usingComponents": {
+      "i-modal": "../components/iview/modal"
+    }
   }
 
 </script>
