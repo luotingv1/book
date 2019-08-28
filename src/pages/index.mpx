@@ -92,8 +92,10 @@
       this.currentPage++;
       this._doSearch()
     },
-    async onLoad() {
+     onLoad() {
       this.db = wx.cloud.database();
+    },
+    onShow(){
       this._doSearch();
     },
     methods: {

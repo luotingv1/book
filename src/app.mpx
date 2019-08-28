@@ -65,11 +65,12 @@
   {
     "pages": [
       "./pages/personal",
-      "./pages/myPublish",
-      "./pages/myCollect",
-      "./pages/bookDetail",
       "./pages/publish",
       "./pages/index",
+      "./pages/bookDetail",
+      "./pages/myBook",
+      "./pages/myPublish",
+      "./pages/myCollect",
       "./pages/login",
       "./pages/publishBook",
       "./pages/addBook"

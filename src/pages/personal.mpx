@@ -16,14 +16,15 @@
       </block>
     </view>
     <i-cell-group>
-      <i-cell title="我的收藏" is-link url="{{userInfo.avatarUrl?'myCollect?id='+openId:'login'}}"></i-cell>
-      <i-cell title="我的发布" is-link url="{{userInfo.avatarUrl?'myPublish?id='+openId:'login'}}"></i-cell>
-      <i-cell title="我的图书" is-link url="{{userInfo.avatarUrl?'myBook?id='+openId:'login'}}"></i-cell>
+      <i-cell title="我的收藏" is-link url="{{userInfo.avatarUrl?'myCollect':'login'}}"></i-cell>
+      <i-cell title="我的发布" is-link bindtap='myPublish'></i-cell>
+      <i-cell title="我的图书" is-link url="{{userInfo.avatarUrl?'myBook':'login'}}"></i-cell>
     </i-cell-group>
   </view>
 </template>
 
 <script>
+
   import {
     createPage
   } from '@mpxjs/core'
@@ -32,19 +33,35 @@
     data: {
       userInfo: {},
     },
-    ...store.mapGetters([
-      'openId',
-    ]),
-    onLoad() {
-      // 所在页面显示之后就会执行一次
+     computed: {
+      ...store.mapGetters([
+        'openId'
+      ])
+    },
+    onShow() {
+      this.getStatus()
+    },
+    methods: {
+      getStatus(){
+  // 所在页面显示之后就会执行一次
       wx.getUserInfo({
         success: (res) => {
           this.userInfo = res.userInfo;
         }
       })
-    },
-    methods: {
-
+      },
+      myPublish(){
+        if(!this.openId){
+          setTimeout(() => {
+            this.myPublish()
+          }, 300);
+          return;
+        };
+        console.log(this.openId);
+         wx.navigateTo({
+          url: `/pages/myPublish?id=${this.openId}&form=publish`
+        })
+      }
     }
   })
 

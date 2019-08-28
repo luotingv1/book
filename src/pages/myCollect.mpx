@@ -1,6 +1,6 @@
 <template minapp='native' xlang='wxml'>
   <view class='container'>
-    <i-message id="message"  />
+    <i-message id="message" />
     <block wx:if='{{list.length>0}}'>
       <view wx:for="{{list}}" wx:key='{{item._id}}' class='swipe'>
         <view class='swipe-tip'>含{{item.books.length}}本书·被收藏{{item.collect_num}}次</view>
@@ -38,7 +38,7 @@
       list: [],
       toggle: false
     },
-    async onLoad() {
+     onLoad() {
       // 所在页面显示之后就会执行一次
       wx.cloud.callFunction({
         name: 'getCollects'
@@ -48,8 +48,8 @@
         this.list = result ? result : [];
         if (this.list.length > 0) {
           $Message({
-            content: '左滑删除书单',
-            duration: 2
+            content: '左滑取消收藏',
+            duration: 1
           });
         }
       })

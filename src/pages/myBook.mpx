@@ -1,0 +1,139 @@
+<template minapp='native' xlang='wxml'>
+  <view class='container'>
+    <i-message id="message" />
+    <i-view wx:if='{{list.length>0}}'>
+      <i-swipeout wx:for="{{list}}" wx:key='{{item._id}}' operateWidth="{{60}}" unclosable="{{true}}"
+        toggle="{{toggle}}">
+        <view slot="content" class='swipe-book'>
+          <view class='book-bg'>
+            <view class="book-title">{{item.name}}</view>
+          </view>
+          <view>
+            <view class="book-name">《{{item.name}}》</view>
+            <view class="book-classify">分类：{{item.classifyName}}</view>
+            <view class='alignCenter'> 是否读完：<i-switch value="{{item.isRead}}" bind:change="onChange(index,$event)"
+                size="large">
+                <view slot="open">已读</view>
+                <view slot="close">未读</view>
+              </i-switch>
+            </view>
+          </view>
+        </view>
+        <view class='action' slot="button">
+          <i-icon size="26" type="delete" color='#fff' bindtap="actionsTap(index)"></i-icon>
+        </view>
+      </i-swipeout>
+    </i-view>
+    <view wx:else class='empty-wrap'>
+      <image src='../../static/images/img-tip-empty.png' class='image-tip'></image>
+      <view class='tip-text'>暂无添加书籍,快去添加吧</view>
+    </view>
+  </view>
+</template>
+
+<script>
+  const {
+    $Message
+  } = require('../components/iview/base/index');
+  import {
+    createPage
+  } from '@mpxjs/core'
+  import store from '../store/index'
+
+  createPage({
+    data: {
+      db: null,
+      list: [],
+      toggle: false
+    },
+      computed: {
+      ...store.mapGetters([
+        'openId'
+      ])
+    },
+    onLoad() {
+      // 所在页面显示之后就会执行一次
+      this.db = wx.cloud.database();
+      this._doSearch()
+    },
+    methods: {
+       async _doSearch() {
+        if (!this.openId) {
+          setTimeout(() => {
+            this._doSearch()
+          }, 300);
+          let res = await this.db.collection('myBooks').where({
+            _openid: this.openId
+          }).get();
+          this.list = res.data;
+          if (this.list.length > 0) {
+            $Message({
+              content: '左滑删除书籍',
+              duration: 1
+            });
+          }
+        }
+      },
+      actionsTap(index) {
+        this.db.collection('myBooks').doc(this.list[index]._id).remove().then(() => {
+          this.list.splice(index, 1);
+          this.toggle = !this.toggle;
+        })
+      },
+      onChange(index, e) {
+        let detail = e.detail;
+        this.db.collection('myBooks').doc(this.list[index]._id).update({
+          data: {
+            isRead: detail.value
+          }
+        }).then(() => {
+          this.list[index].isRead = detail.value;
+        });
+      }
+    }
+  })
+
+</script>
+
+<style lang="scss">
+  .swipe-book {
+    display: flex;
+    align-items: center;
+  }
+
+  .book-bg {
+    background: #5cadff;
+    width: 150rpx;
+    height: 200rpx;
+    margin-right: 18rpx;
+    text-align: center;
+
+    .book-title {
+      color: #fff;
+      font-size: 24rpx;
+      margin-top: 10rpx;
+    }
+  }
+
+  .book-classify {
+    margin-bottom: 4rpx;
+  }
+
+  .book-name {
+    font-size: 30rpx;
+  }
+
+</style>
+
+<script type='application/json' lang='json'>
+  {
+    "navigationBarTitleText": "我的书籍",
+    "usingComponents": {
+      "i-icon": "../components/iview/icon",
+      "i-swipeout": "../components/iview/swipeout",
+      "i-switch": "../components/iview/switch",
+      "i-message": "../components/iview/message"
+    }
+  }
+
+</script>

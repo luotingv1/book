@@ -10,7 +10,7 @@
         <view>分享书单</view>
       </view>
     </view>
-    <i-modal title="请先登录" visible="{{ visible }}"  bind:ok="ng('login')" bind:cancel="handleClose"></i-modal>
+    <i-modal title="请先登录" visible="{{ visible }}" bind:ok="ng('login')" bind:cancel="handleClose"></i-modal>
   </view>
 </template>
 
@@ -22,30 +22,30 @@
   createPage({
     data: {
       isAccredit: true,
-      visible:false
+      visible: false
     },
-    onLoad() {
-      // 所在页面显示之后就会执行一次
-      wx.getSetting({
-        success: (res) => {
-          this.isAccredit = res.authSetting['scope.userInfo'] ? true : false;
-          if(!this.isAccredit){
-           this.visible=true;
-          }
-        }
-      })
+    onShow() {
+      this.getStatus()
     },
     methods: {
-      handleClose(){
-        this.visible=false;
+      getStatus() {
+        wx.getSetting({
+          success: (res) => {
+            this.isAccredit = res.authSetting['scope.userInfo'] ? true : false;
+            this.visible = !this.isAccredit
+          }
+        })
+      },
+      handleClose() {
+        this.visible = false;
       },
       ng(url) {
-        if (this.isAccredit||url=='login') {
+        if (this.isAccredit || url == 'login') {
           wx.navigateTo({
             url: `/pages/${url}`
           })
-        }else{
-          this.visible=true;
+        } else {
+          this.visible = true;
         }
       }
     }

@@ -1,5 +1,6 @@
 <template>
   <view>
+    <i-message id="message" />
     <view class="index" wx:if='{{!showEmptyTip}}'>
       <view wx:for="{{list}}" wx:key='{{item._id}}' class='swipe'>
         <view class='swipe-tip'>含{{item.books.length}}本书·被收藏{{item.collect_num}}次</view>
@@ -12,7 +13,7 @@
             <view class='swipe-content'>{{item.content}}</view>
           </view>
           <view class='action' slot="button">
-            <i-icon size="26" type="delete" color='#fff' bindtap="actionsTap(item._id,index)"></i-icon>
+            <i-icon size="26" type="delete" color='#fff' bindtap="actionsTap(index)"></i-icon>
           </view>
         </i-swipeout>
       </view>
@@ -27,24 +28,23 @@
 </template>
 
 <script>
+  const {
+    $Message
+  } = require('../components/iview/base/index');
   import {
     createPage
   } from '@mpxjs/core'
-  import store from '../store/index'
+
   createPage({
     data: {
       currentPage: 1, //当前页码
       isLastPage: false,
       list: [],
+      openId:null,
       db: {},
-      toggle:false,
+      toggle: false,
       showEmptyTip: false,
-      canSearch: true
-    },
-    computed: {
-      ...store.mapGetters([
-        'openId',
-      ])
+      canSearch: true,
     },
     onReachBottom() {
       if (this.isLastPage) {
@@ -53,29 +53,37 @@
       this.currentPage++;
       this._doSearch()
     },
-    async onLoad() {
+    onLoad({
+      id
+    }) {
       this.db = wx.cloud.database();
+      this.openId = id;
+      $Message({
+        content: '左滑删除书单',
+        duration: 1
+      });
+    },
+    onShow(){
       this._doSearch();
     },
     methods: {
-      actionsTap(id,index){
-        this.db.collection('bookLists').doc(id).remove().then(()=>{
-          this.list.splice(index,1);
-          this.toggle=!this.toggle;
+      actionsTap(index) {
+        this.db.collection('bookLists').doc(this.list[index]._id).remove().then(() => {
+          this.list.splice(index, 1);
+          this.toggle = !this.toggle;
         })
       },
       goToDetail(id) {
         wx.navigateTo({
-          url: `/pages/bookDetail?id=${id}`
+          url: `/pages/bookDetail?id=${id}&from=publish`
         })
       },
       _doSearch() {
         if (!this.canSearch) return;
-        if(!this.openId){
+        if (!this.openId) {
           setTimeout(() => {
             this._doSearch()
-          }, 500);
-          return;
+          }, 300);
         }
         this.canSearch = false;
         let data_search = {
@@ -114,10 +122,11 @@
 
 <script type="application/json">
   {
-    "navigationBarTitleText": "书友圈",
+    "navigationBarTitleText": "",
     "usingComponents": {
       "i-swipeout": "../components/iview/swipeout",
       "i-load-more": "../components/iview/load-more",
+      "i-message": "../components/iview/message",
       "i-icon": "../components/iview/icon"
     }
   }

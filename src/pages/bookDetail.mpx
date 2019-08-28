@@ -17,7 +17,7 @@
         <view class="f10" style="color:#80848f">{{book.collect_num}}人已收藏</view>
         <i-button bind:click="operates(book._id,book.iscollect,'collect')" type="ghost" shape="circle" size='small'
           inline i-class='btn red'>{{book.iscollect?'已收藏':'收藏'}}</i-button>
-        <i-button bind:click="recommend(book._openId)" type="ghost" shape="circle" size='small' inline i-class='btn'>
+        <i-button bind:click="recommend(book._openid)" type="ghost" shape="circle" size='small' inline i-class='btn'>
           查看TA的推荐
         </i-button>
       </i-col>
@@ -60,15 +60,24 @@
   createPage({
     data: {
       _lastTime: 0,
-      list: {}
+      list: {},
+      from: null,
+      id:null
     },
-    async onLoad({id}) {
-      let db=wx.cloud.database()
-      let detail=await db.collection('bookLists').doc(id).get();
-       this.list = detail.data;
+     onLoad({
+      id,
+      from
+    }) {
+      this.id=id;
+      this.from = from;
+    },
+    async onShow(){
+     let db = wx.cloud.database();
+      let detail = await db.collection('bookLists').doc(this.id).get();
+      this.list = detail.data;
     },
     computed: {
-       ...store.mapGetters([
+      ...store.mapGetters([
         'openId',
         'isAccredit'
       ]),
@@ -95,11 +104,17 @@
     },
     methods: {
       recommend(id) {
+        if (this.from) {
+          wx.navigateBack({
+            delta: 1
+          })
+          return;
+        }
         wx.navigateTo({
-          url: `/pages/recommend?id=${id}`
+          url: `/pages/myPublish?id=${id}&form=publish`
         })
       },
-      operates(id,type, name) {
+      operates(id, type, name) {
         if (!this.isAccredit) {
           wx.switchTab({
             url: '/pages/publish'
@@ -111,7 +126,7 @@
           wx.cloud.callFunction({
               name: 'operates',
               data: {
-                type: type==1?0:1,
+                type: type == 1 ? 0 : 1,
                 id,
                 name
               }
