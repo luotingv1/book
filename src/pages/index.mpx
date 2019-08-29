@@ -5,18 +5,6 @@
         src="https://upload-images.jianshu.io/upload_images/14462374-a437dd0c62653d6d.png?imageMogr2/auto-orient/strip|imageView2/2/w/1072/format/webp"
         mode='widthfix'>
       </image>
-      <image
-        src="https://upload-images.jianshu.io/upload_images/14462374-aea02ec49fd1ae06.png?imageMogr2/auto-orient/strip|imageView2/2/w/1096/format/webp"
-        mode='widthfix'>
-      </image>
-      <image
-        src="https://upload-images.jianshu.io/upload_images/14462374-2a63a4b4bed2b44b.png?imageMogr2/auto-orient/strip|imageView2/2/w/1133/format/webp"
-        mode='widthfix'>
-      </image>
-      <image
-        src="https://upload-images.jianshu.io/upload_images/14462374-a437dd0c62653d6d.png?imageMogr2/auto-orient/strip|imageView2/2/w/1072/format/webp"
-        mode='widthfix'>
-      </image>
     </view>
     <block wx:else>
       <view class='tabs'>
@@ -31,14 +19,16 @@
             <view slot="content">
               {{item.content}}</view>
             <view slot="footer" class='flex'>
-              <label >
-                <i-icon type="like" catchtap="operates(item._id,1,'like')" size="18" wx:if="{{!item.islike}}" class='icon'/>
-                <i-icon type="like_fill" catchtap="operates(item._id,0,'like')" size="18" color='#ed3f14' wx:else  class='icon'/>
+              <label>
+                <i-icon type="like" catchtap="operates(item._id,1,'like')" size="18" wx:if="{{!item.islike}}"
+                  class='icon' />
+                <i-icon type="like_fill" catchtap="operates(item._id,0,'like')" size="18" color='#ed3f14' wx:else
+                  class='icon' />
                 {{item.like_num||0}}
               </label>
               <label class='alignCenter'>
-                <i-icon type="collection" catchtap="operates(item._id,1,'collect')" wx:if="{{!item.iscollect}}" class='icon'
-                  size="18" />
+                <i-icon type="collection" catchtap="operates(item._id,1,'collect')" wx:if="{{!item.iscollect}}"
+                  class='icon' size="18" />
                 <i-icon type="collection_fill" catchtap="operates(item._id,0,'collect')" size="18" wx:else class='icon'
                   color='#ff9900' />
                 {{item.collect_num||0}}</label>
@@ -114,6 +104,10 @@
       this.currentPage++;
       this._doSearch()
     },
+    onPullDownRefresh() {
+      wx.stopPullDownRefresh();
+      this.init()
+    },
     onLoad() {
       this.db = wx.cloud.database();
       wx.cloud.database().collection('isbegin').doc('7ca42489-f006-4681-95c7-95cd0a4eb2c5').get().then(({
@@ -123,9 +117,17 @@
       })
     },
     onShow() {
-      this._doSearch();
+      this.init()
     },
     methods: {
+      init() {
+        this.list = [];
+        this.currentPage = 1;
+        this.showEmptyTip = false;
+        this.isLastPage = false;
+        this.canSearch = true;
+        this._doSearch();
+      },
       share() {
         return;
       },
@@ -167,12 +169,7 @@
       },
       toggle(val) {
         this.active = val;
-        this.list = [];
-        this.currentPage = 1;
-        this.showEmptyTip = false;
-        this.isLastPage = false;
-        this.canSearch = true;
-        this._doSearch();
+        this.init();
       },
       _doSearch() {
         if (!this.canSearch) return;
@@ -218,7 +215,8 @@
   .index {
     padding-top: 100rpx;
   }
-  .icon{
+
+  .icon {
     display: inline-flex;
     height: 100%;
     align-items: center;
@@ -279,6 +277,7 @@
 <script type="application/json">
   {
     "navigationBarTitleText": "书友圈",
+    "enablePullDownRefresh": true,
     "usingComponents": {
       "i-card": "../components/iview/card",
       "i-load-more": "../components/iview/load-more",

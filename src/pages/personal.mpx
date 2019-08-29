@@ -24,7 +24,6 @@
 </template>
 
 <script>
-
   import {
     createPage
   } from '@mpxjs/core'
@@ -33,7 +32,7 @@
     data: {
       userInfo: {},
     },
-     computed: {
+    computed: {
       ...store.mapGetters([
         'openId'
       ])
@@ -42,23 +41,23 @@
       this.getStatus()
     },
     methods: {
-      getStatus(){
-  // 所在页面显示之后就会执行一次
-      wx.getUserInfo({
-        success: (res) => {
-          this.userInfo = res.userInfo;
-        }
-      })
+      getStatus() {
+        // 所在页面显示之后就会执行一次
+        wx.getUserInfo({
+          success: (res) => {
+            this.userInfo = res.userInfo;
+          }
+        })
       },
-      myPublish(){
-        if(!this.openId){
+      myPublish() {
+        if (!this.openId) {
           setTimeout(() => {
             this.myPublish()
           }, 300);
           return;
         };
         console.log(this.openId);
-         wx.navigateTo({
+        wx.navigateTo({
           url: `/pages/myPublish?id=${this.openId}&form=publish`
         })
       }

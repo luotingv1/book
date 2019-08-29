@@ -53,6 +53,10 @@
       this.currentPage++;
       this._doSearch()
     },
+     onPullDownRefresh() {
+      wx.stopPullDownRefresh();
+      this.init()
+    },
     onLoad({
       id
     }) {
@@ -64,9 +68,17 @@
       });
     },
     onShow(){
-      this._doSearch();
+      this.init()
     },
     methods: {
+        init() {
+        this.list = [];
+        this.currentPage = 1;
+        this.showEmptyTip = false;
+        this.isLastPage = false;
+        this.canSearch = true;
+        this._doSearch();
+      },
       actionsTap(index) {
         this.db.collection('bookLists').doc(this.list[index]._id).remove().then(() => {
           this.list.splice(index, 1);
@@ -123,6 +135,7 @@
 <script type="application/json">
   {
     "navigationBarTitleText": "",
+    "enablePullDownRefresh": true,
     "usingComponents": {
       "i-swipeout": "../components/iview/swipeout",
       "i-load-more": "../components/iview/load-more",

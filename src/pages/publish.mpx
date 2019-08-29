@@ -1,7 +1,7 @@
 <template minapp='native' xlang='wxml'>
   <view class='container'>
     <view class='flex'>
-      <view bindtap="ng('addBook')" class='flex-item' >
+      <view bindtap="ng('addBook')" class='flex-item'>
         <image src="../../static/images/shudan.png" mode="scaleToFill" class='image-item'></image>
         <view>添加书籍</view>
       </view>
@@ -23,12 +23,14 @@
     data: {
       isAccredit: true,
       visible: false,
-      isbegin:false
+      isbegin: false
     },
     async onShow() {
       this.getStatus();
-      wx.cloud.database().collection('isbegin').doc('7ca42489-f006-4681-95c7-95cd0a4eb2c5').get().then(({data})=>{
-        this.isbegin=data.isbegin;
+      wx.cloud.database().collection('isbegin').doc('7ca42489-f006-4681-95c7-95cd0a4eb2c5').get().then(({
+        data
+      }) => {
+        this.isbegin = data.isbegin;
       })
     },
     methods: {
