@@ -1,42 +1,63 @@
 <template>
   <view>
-    <view class='tabs'>
-      <view class='tabs-box'>
-        <view class="tab {{active==1?'active':''}}" bindtap='toggle(1)'>男频</view>
-        <view class="tab {{active==2?'active':''}}" bindtap='toggle(2)'>女频</view>
+    <view wx:if='{{!isbegin}}'>
+      <image
+        src="https://upload-images.jianshu.io/upload_images/14462374-a437dd0c62653d6d.png?imageMogr2/auto-orient/strip|imageView2/2/w/1072/format/webp"
+        mode='widthfix'>
+      </image>
+      <image
+        src="https://upload-images.jianshu.io/upload_images/14462374-aea02ec49fd1ae06.png?imageMogr2/auto-orient/strip|imageView2/2/w/1096/format/webp"
+        mode='widthfix'>
+      </image>
+      <image
+        src="https://upload-images.jianshu.io/upload_images/14462374-2a63a4b4bed2b44b.png?imageMogr2/auto-orient/strip|imageView2/2/w/1133/format/webp"
+        mode='widthfix'>
+      </image>
+      <image
+        src="https://upload-images.jianshu.io/upload_images/14462374-a437dd0c62653d6d.png?imageMogr2/auto-orient/strip|imageView2/2/w/1072/format/webp"
+        mode='widthfix'>
+      </image>
+    </view>
+    <block wx:else>
+      <view class='tabs'>
+        <view class='tabs-box'>
+          <view class="tab {{active==1?'active':''}}" bindtap='toggle(1)'>男频</view>
+          <view class="tab {{active==2?'active':''}}" bindtap='toggle(2)'>女频</view>
+        </view>
       </view>
-    </view>
-    <view class="index" wx:if='{{!showEmptyTip}}'>
-      <view class='mb-10' wx:for='{{newList}}' wx:key='{{item._id}}' bindtap='goToDetail(item._id)'>
-        <i-card title="{{item.title}}" thumb="cloud://booklist-1hrsi.626f-booklist-1hrsi/book.jpg">
-          <view slot="content">
-            {{item.content}}</view>
-          <view slot="footer" class='flex'>
-            <label>
-              <i-icon type="like" catchtap="operates(item._id,1,'like')" size="18" wx:if="{{!item.islike}}" />
-              <i-icon type="like_fill" catchtap="operates(item._id,0,'like')" size="18" color='#ed3f14' wx:else />
-              {{item.like_num||0}}
-            </label>
-            <label>
-              <i-icon type="collection" catchtap="operates(item._id,1,'collect')" wx:if="{{!item.iscollect}}"
-                size="18" />
-              <i-icon type="collection_fill" catchtap="operates(item._id,0,'collect')" size="18" wx:else
-                color='#ff9900' />
-              {{item.collect_num||0}}</label>
-            <label>
-              <button open-type="share" id='{{item._id}}' catchtap='share' hover-class="none" class='share-btn'>
-                <i-icon type="share_fill" size="18" /></button>
-            </label>
-          </view>
-        </i-card>
+      <view class="index" wx:if='{{!showEmptyTip}}'>
+        <view class='mb-10' wx:for='{{newList}}' wx:key='{{item._id}}' bindtap='goToDetail(item._id)'>
+          <i-card title="{{item.title}}" thumb="cloud://booklist-1hrsi.626f-booklist-1hrsi/book.jpg">
+            <view slot="content">
+              {{item.content}}</view>
+            <view slot="footer" class='flex'>
+              <label >
+                <i-icon type="like" catchtap="operates(item._id,1,'like')" size="18" wx:if="{{!item.islike}}" class='icon'/>
+                <i-icon type="like_fill" catchtap="operates(item._id,0,'like')" size="18" color='#ed3f14' wx:else  class='icon'/>
+                {{item.like_num||0}}
+              </label>
+              <label class='alignCenter'>
+                <i-icon type="collection" catchtap="operates(item._id,1,'collect')" wx:if="{{!item.iscollect}}" class='icon'
+                  size="18" />
+                <i-icon type="collection_fill" catchtap="operates(item._id,0,'collect')" size="18" wx:else class='icon'
+                  color='#ff9900' />
+                {{item.collect_num||0}}</label>
+              <label>
+                <button open-type="share" id='{{item._id}}' catchtap='share' hover-class="none" class='share-btn'>
+                  <i-icon type="share_fill" size="18" /></button>
+              </label>
+            </view>
+          </i-card>
+        </view>
+        <i-load-more tip="暂无更多数据" wx:if='{{isLastPage}}' loading="{{ false }}" />
       </view>
-      <i-load-more tip="暂无更多数据" wx:if='{{isLastPage}}' loading="{{ false }}" />
-    </view>
-    <view wx:else class='empty-wrap'>
-      <image src='../../static/images/img-tip-empty.png' class='image-tip'></image>
-      <view class='tip-text'>暂无分享书单,快去发布吧</view>
-    </view>
-    <i-load-more wx:if='{{!canSearch}}' />
+      <view wx:else class='empty-wrap'>
+        <image src='../../static/images/img-tip-empty.png' class='image-tip'></image>
+        <view class='tip-text'>暂无分享书单,快去发布吧</view>
+      </view>
+      <i-load-more wx:if='{{!canSearch}}' />
+    </block>
+
   </view>
 </template>
 
@@ -54,7 +75,8 @@
       _lastTime: 0,
       showEmptyTip: false,
       active: 1,
-      canSearch: true
+      canSearch: true,
+      isbegin: false
     },
     computed: {
       ...store.mapGetters([
@@ -92,10 +114,15 @@
       this.currentPage++;
       this._doSearch()
     },
-     onLoad() {
+    onLoad() {
       this.db = wx.cloud.database();
+      wx.cloud.database().collection('isbegin').doc('7ca42489-f006-4681-95c7-95cd0a4eb2c5').get().then(({
+        data
+      }) => {
+        this.isbegin = data.isbegin;
+      })
     },
-    onShow(){
+    onShow() {
       this._doSearch();
     },
     methods: {
@@ -190,6 +217,11 @@
 <style lang="scss" scoped>
   .index {
     padding-top: 100rpx;
+  }
+  .icon{
+    display: inline-flex;
+    height: 100%;
+    align-items: center;
   }
 
   .tabs {

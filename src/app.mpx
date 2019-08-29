@@ -64,9 +64,9 @@
 <script type="application/json">
   {
     "pages": [
-      "./pages/personal",
-      "./pages/publish",
       "./pages/index",
+      "./pages/publish",
+      "./pages/personal",
       "./pages/bookDetail",
       "./pages/myBook",
       "./pages/myPublish",

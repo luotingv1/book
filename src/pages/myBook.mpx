@@ -62,7 +62,9 @@
           setTimeout(() => {
             this._doSearch()
           }, 300);
-          let res = await this.db.collection('myBooks').where({
+          return;
+        }
+            let res = await this.db.collection('myBooks').where({
             _openid: this.openId
           }).get();
           this.list = res.data;
@@ -72,7 +74,6 @@
               duration: 1
             });
           }
-        }
       },
       actionsTap(index) {
         this.db.collection('myBooks').doc(this.list[index]._id).remove().then(() => {
